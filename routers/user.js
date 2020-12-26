@@ -97,6 +97,7 @@ router.get("/verify-token", async(req, res) => {
 
 router.post("/verify_email",(req,res)=>{
     const {EMAIL_VERIFICATION_TEMPLATE} = require("../utils/constants")
+    let code = ID(8).generate();
     async function main() {
       let transporter = nodemailer.createTransport({
         service: "gmail",
@@ -107,18 +108,18 @@ router.post("/verify_email",(req,res)=>{
         // debug: true,
         // logger: true
       });
-      let code = ID(8).generate();
       let info = await transporter.sendMail({
         from: '"RCONNECT 👻" <rconnect250@gmail.com>',
         to: req.body.email,
         subject: "Email verification", 
         text: `Hi ${req.body.fname+' '+req.body.lname}. Thank you for choosing RCONNECT. Your verification code is: ${code}`,
-        html: EMAIL_VERIFICATION_TEMPLATE.replace("USER_FULL_NAME",req.body.fname+' '+req.body.lname).replace("VERIFICATION_CODE",code)
+        // html: EMAIL_VERIFICATION_TEMPLATE.replace("USER_FULL_NAME",req.body.fname+' '+req.body.lname).replace("VERIFICATION_CODE",code)
       })
     }
     main().catch(console.error);
     return res.send({
         success: true,
+        code: code,
         message: "Email sent!"
     })
 })
@@ -243,137 +244,4 @@ router.put("/update-account", (req, res) => {
             })
     }
 })
-
-
-router.post("/verify_email/:email",(req,res)=>{
-
-    const nodemailer = require("nodemailer");
-
-    
-    async function main() {
-      
-      let transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: "rconnect250@gmail.com", 
-          pass: "chatever50", 
-        },
-        // debug: true,
-        // logger: true
-      });
-    
-
-      function makeId(length) {
-        var result = '';
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
-        var charactersLength = characters.length;
-        for ( var i = 0; i < length; i++ ) {
-           result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result.toUpperCase();
-     }
-
-      let info = await transporter.sendMail({
-         
-        from: '"RCONNECT 👻" <rconnect250@gmail.com>',
-        to: req.params.email,
-        subject: "✔", 
-        text: "Email verification", 
-        html:`<!DOCTYPE html>
-        <html>
-        <head>
-            <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-        </head>
-        <style type="text/css">
-        body{background-color: #88BDBF;margin: 0px;}
-        </style>
-        <body>
-            <table border="0" width="50%" style="margin:auto;padding:30px;background-color: #F3F3F3;border:1px solid #5e6ce7;">
-                <tr>
-                    <td>
-                        <table border="0" width="100%">
-                            <tr>
-                                <td>
-                                    <h1>RCONNECT</h1>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <table border="0" cellpadding="0" cellspacing="0" style="text-align:center;width:100%;background-color: #fff;">
-                            <tr>
-                                <td style="background-color:#337eee;height:100px;font-size:50px;color:#fff;"><i class="fa fa-envelope-o" aria-hidden="true"></i></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <h1 style="padding-top:25px;">Email Confirmation</h1>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <p style="padding:0px 100px;">
-                                    ${makeId(8)}
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <table border="0" width="100%" style="border-radius: 5px;text-align: center;">
-                            <tr>
-                                <td>
-                                    <h3 style="margin-top:10px;">Stay in touch</h3>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="margin-top:20px;">
-                                        <a href="www.twitter.com" style="text-decoration: none;">
-                                            <span class="twit" style="padding:10px 9px;background-color:#4099FF;color:#fff;border-radius:50%;">
-                                            <i class="fa fa-twitter" aria-hidden="true" style="height:20px;width:20px;">
-                                            </i>
-                                        </span>
-                                    </a>
-                                        <a href="https://www.facebook.com/pages/creation/?ref_type=launch_point" style="text-decoration: none;">
-                                            <span class="fb" style="padding:10px 9px;background-color: #3B5998;color:#fff;border-radius:50%;">
-                                                <i class="fa fa-facebook" aria-hidden="true" style="height:20px;width:20px;">
-                                                </i>
-                                            </span>
-                                        </a>
-                                        <a href="rconnect250@gmail.com" style="text-decoration: none;">
-                                            <span class="msg" style="padding:10px 9px;background-color: #FFC400;color:#fff;border-radius:50%;"">
-                                                <i class="fa fa-envelope-o" aria-hidden="true" style="height:20px;width:20px;">
-                                                </i></span>
-                                            </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="margin-top: 20px;">
-                                        <span style="font-size:12px;">Copyright © rconnect</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </body>
-        </html>
-        `
-      });
-      console.log("Message sent: %s", info.messageId);
-    
-    }
-    
-    main().catch(console.error);
- 
-})
-
-
 module.exports = router;

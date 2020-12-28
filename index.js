@@ -4,17 +4,7 @@
 require('./mongodb/index')
 const express = require("express");
 const client_server = express();
-const socket_io_server = express()
-
-    /**
-     * server to handle clients apis through express server
-     */
 const CLIENT_SERVER = require("http").createServer(client_server);
-/**
- * server to handle clients realtime communication through socket.io
- */
-const REALTIME_CHAT_SERVER = require("http").createServer(socket_io_server);
-const io = require("./lib/chat_server");
 const cors = require("cors");
 const UserRouter = require("./routers/user");
 const ChannelRouter = require("./routers/channel");
@@ -52,24 +42,14 @@ client_server.get("",(req,res)=>{
         message: "Server is already up & running."
     })
 })
-
 client_server.use(history());
-//==============socket_io_server===================
-socket_io_server.use(passport.initialize())
-socket_io_server.use(cors(cors_opts))
-io.listen(REALTIME_CHAT_SERVER);
-// =======================================
 
 
 
 
 //==========ATTACH SERVERS ON PORTS=========
 const CLIENT_SERVER_PORT = process.env.PORT || 3000;
-const REALTIME_CHAT_SERVER_PORT = process.env.PORT || 3001;
 CLIENT_SERVER.listen(CLIENT_SERVER_PORT, function() {
-    console.log(`#CLIENT_SERVER is listening on http://localhost:${CLIENT_SERVER_PORT}`);
-});
-REALTIME_CHAT_SERVER.listen(REALTIME_CHAT_SERVER_PORT, function() {
-    console.log(`#REALTIME_CHAT_SERVER is listening on http://localhost:${REALTIME_CHAT_SERVER_PORT}`);
+    console.log(`#CLIENT_SERVER is listening on port: ${CLIENT_SERVER_PORT}`);
 });
 // ==========================================

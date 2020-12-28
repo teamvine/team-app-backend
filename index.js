@@ -69,7 +69,7 @@ const REALTIME_CHAT_SERVER_PORT = process.env.PORT || 3001;
 CLIENT_SERVER.listen(CLIENT_SERVER_PORT, function() {
     console.log(`#CLIENT_SERVER is listening on http://localhost:${CLIENT_SERVER_PORT}`);
 });
-// REALTIME_CHAT_SERVER.listen(REALTIME_CHAT_SERVER_PORT, function() {
-//     console.log(`#REALTIME_CHAT_SERVER is listening on http://localhost:${REALTIME_CHAT_SERVER_PORT}`);
-// });
+REALTIME_CHAT_SERVER.listen(REALTIME_CHAT_SERVER_PORT, function() {
+    console.log(`#REALTIME_CHAT_SERVER is listening on http://localhost:${REALTIME_CHAT_SERVER_PORT}`);
+});
 // ==========================================

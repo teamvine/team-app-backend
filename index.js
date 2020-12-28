@@ -46,7 +46,12 @@ client_server.use("/user", UserRouter);
 client_server.use("/channel", ChannelRouter);
 client_server.use("/workspace", WorkspaceRouter);
 client_server.use("/message", MessagesRouter);
-
+client_server.get("",(req,res)=>{
+    return res.send({
+        status: "Working",
+        message: "Server is already up & running."
+    })
+})
 
 client_server.use(history());
 //==============socket_io_server===================

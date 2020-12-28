@@ -5,7 +5,7 @@ exports.errorMessage = {
     INSUFFICIENT_USER_INFO: "Please provide all of user information.",
     UPLOAD_FILE_MISSING: "Please attach a file in your request.",
     REQUIRED_FIELDS_MISSING: "REQUIRED_FIELDS_MISSING",
-    USER_WITH_SAME_EMAIL_EXISTS: "Tha email was already taken!",
+    USER_WITH_SAME_EMAIL_EXISTS: "That email was already taken!",
     INVALID_INFO: "Provide valid info"
 };
 

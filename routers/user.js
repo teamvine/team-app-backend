@@ -112,7 +112,7 @@ router.post("/verify_email",(req,res)=>{
         from: '"RCONNECT 👻" <rconnect250@gmail.com>',
         to: req.body.email,
         subject: "Email verification", 
-        text: `Hi ${req.body.fname+' '+req.body.lname}. Thank you for choosing RCONNECT. Your verification code is: ${code}`,
+        text: `Hi ${req.body.full_name}. Thank you for choosing RCONNECT. Your verification code is: ${code}`,
         // html: EMAIL_VERIFICATION_TEMPLATE.replace("USER_FULL_NAME",req.body.fname+' '+req.body.lname).replace("VERIFICATION_CODE",code)
       })
     }
@@ -121,6 +121,29 @@ router.post("/verify_email",(req,res)=>{
         success: true,
         code: code,
         message: "Email sent!"
+    })
+})
+
+router.get("/check-email-taken/:email",(req,res)=>{
+    userController.getByEmail(req.params.email)
+    .then(doc=>{
+        if(doc!=null){
+            return res.send({
+                success: true,
+                emailUsed: true
+            })
+        }else{
+            return res.send({
+                success: true,
+                emailUsed: false
+            })
+        }
+    })
+    .catch((err)=>{
+        return res.send({
+            success: false,
+            emailUsed: true,
+        })
     })
 })
 

@@ -95,6 +95,9 @@ userController.findByEmail = (email, password) => {
     }
     return User.findOne({ email: email })
 };
+userController.getByEmail= (email)=>{
+    return User.findOne({ email: email })
+}
 
 userController.updateUserAccount = async(user_id, fields) => {
     return await User.findOneAndUpdate({ _id: user_id }, fields, { new: true, useFindAndModify: false })

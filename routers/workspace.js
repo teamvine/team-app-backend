@@ -134,4 +134,16 @@ router.get("/search-members-by-name", (req, res) => {
         })
 })
 
+router.get("/public-by-name/:name", async(req, res) => {
+    console.log("#find workspace by name request received..")
+    let name = req.params.name
+    workspaceController.findByName(name)
+        .then(doc => {
+            return baseRouter.success(res, 200, doc)
+        })
+        .catch(err => {
+            return baseRouter.error(res, 200, "No People found with their names containing that text.")
+        })
+})
+
 module.exports = router;

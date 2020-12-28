@@ -14,7 +14,7 @@ function IDGENERATOR(len = 5) {
     };
     this.newID = "";
     len<=0 || typeof len != "number"? this.ID_LENGTH=5 : this.ID_LENGTH=len;
-    this.ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#$@';
+    this.ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return this
 };
 

@@ -205,5 +205,17 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
 //         })
 // }
 
+workspaceController.findByName = async(name)=>{
+    return await workspaceModel.find({ name: new RegExp(name, "i") ,type: "public" }, { //new RegExp(name, "i") yields /name/i
+            _id: 1,
+            name: 1,
+            description: 1,
+            admin_id: 1,
+            created: 1
+        })
+        .sort({
+            name: 1
+        })
+}
 
 module.exports = workspaceController;

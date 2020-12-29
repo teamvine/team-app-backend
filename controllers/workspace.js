@@ -215,7 +215,7 @@ workspaceController.findByName = async(name)=>{
         })
         .sort({
             name: 1
-        })
+        }).limit(10)
 }
 
 module.exports = workspaceController;

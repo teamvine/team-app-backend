@@ -138,11 +138,12 @@ router.get("/public-by-name/:name", async(req, res) => {
     console.log("#find workspace by name request received..")
     let name = req.params.name
     workspaceController.findByName(name)
-        .then(doc => {
-            return baseRouter.success(res, 200, doc)
+        .then(docs => {
+            if(docs==null) return baseRouter.success(res, 200, {success: true,results: []});
+            return baseRouter.success(res, 200, {success: true,results: docs})
         })
         .catch(err => {
-            return baseRouter.error(res, 200, "No People found with their names containing that text.")
+            return baseRouter.error(res, 200, "No Organizations found with their names containing that text.")
         })
 })
 

@@ -211,7 +211,8 @@ workspaceController.findByName = async(name)=>{
             name: 1,
             description: 1,
             admin_id: 1,
-            created: 1
+            created: 1,
+            type: 1
         })
         .sort({
             name: 1

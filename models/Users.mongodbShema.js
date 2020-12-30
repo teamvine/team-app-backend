@@ -53,6 +53,9 @@ const UsersSchema = new mongoose.Schema({
         type: Date,
         required: true
     }
+},
+{
+    timestamps: true
 });
 
 module.exports.UserJoiValidate = function(obj) {

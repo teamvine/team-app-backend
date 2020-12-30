@@ -6,6 +6,7 @@ const { workspaceModel, workspaceJoiValidate } = require('../models/Workspaces.m
     // const workspaceMemberModel = require ('../models/WorkspacesMembers.mongodbSchema');
 const workspaceController = require("../controllers/workspace");
 const channelController = require("../controllers/channel");
+const IDgen = require("../utils/codeGenerator")
 
 router.use(auth.jwtAuth)
 
@@ -16,6 +17,7 @@ router.post("/new-workspace", async(req, res) => {
         //validate received workspace
     let newWorkspace = req.body.workspace
     newWorkspace.info.created = Date()
+    newWorkspace.info.code = IDgen(13).generate()
     if (workspaceJoiValidate(newWorkspace.info).error != undefined) {
         const err = workspaceJoiValidate(newWorkspace.info).error.details[0].message
         return baseRouter.error(res, 200, err.toString().replace(/"/gi, ""));
@@ -39,7 +41,9 @@ router.post("/new-workspace", async(req, res) => {
                     admin_id: decoded.user_id,
                     workspace_id: newWorkspace.info._id.toString(),
                     type: "public",
-                    created: Date()
+                    created: Date(),
+                    workspace_code: newWorkspace.info.code,
+                    channel_code: IDgen(15).generate()
                 }).then(result => {
                     if (result != false) newWorkspace.channels = [result]
                         // if created general add members to general

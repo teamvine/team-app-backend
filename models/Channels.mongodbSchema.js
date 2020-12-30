@@ -31,7 +31,18 @@ const ChannelsSchema = new mongoose.Schema({
     created: {
         type: Date,
         required: true
+    },
+    workspace_code: {
+        type: String,
+        required: true
+    },
+    channel_code: {
+        type: String,
+        required: true
     }
+},
+{
+    timestamps: true
 });
 
 const joiValidate = function(obj) {
@@ -41,7 +52,9 @@ const joiValidate = function(obj) {
         admin_id: Joi.string().required(),
         workspace_id: Joi.string().required(),
         type: Joi.string().required(),
-		created: Joi.date().required()
+        created: Joi.date().required(),
+        workspace_code: Joi.string().required(),
+        channel_code: Joi.string().required()
 	})
 	return schema.validate(obj);
 }

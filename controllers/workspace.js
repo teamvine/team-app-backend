@@ -55,7 +55,6 @@ workspaceController.AddNewMembersOrUpdate = async(workspace_id, newMembers = [{ 
             console.log("new ", members)
             return await members.save()
         } else {
-            console.log(members)
             for (let i = 0; i < members.members.length; i++) {
                 for (let index = 0; index < newMembers.length; index++) {
                     if (members.members[i].user_id == newMembers[index].user_id) {

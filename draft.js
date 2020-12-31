@@ -31,3 +31,6 @@ let obj = {
 
 // let obj_array = _.toArray(obj) // converts object to array
 // console.log(_.first(obj_array)) //prints element at index 0 of array
+
+
+//checkout

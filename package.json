@@ -29,11 +29,7 @@
     "mongoose": "^5.10.2",
     "multer": "^1.4.2",
     "nodemailer": "^6.4.16",
-<<<<<<< HEAD
     "nodemon": "^2.0.6",
-=======
-    "nodemon": "2.0.4",
->>>>>>> 57cf528f8e95b375773494682e01408ac55fa942
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "socket.io": "^2.3.0",

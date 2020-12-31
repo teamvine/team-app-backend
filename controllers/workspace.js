@@ -203,11 +203,8 @@ workspaceController.SearchPublicByName = async(name)=>{
             description: 1,
             admin_id: 1,
             created: 1,
-<<<<<<< HEAD
-            type: 1
-=======
+            type: 1,
             code: 1
->>>>>>> 57cf528f8e95b375773494682e01408ac55fa942
         })
         .sort({
             name: 1

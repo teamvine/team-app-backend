@@ -64,10 +64,6 @@ router.get("/channel-by-id/:channel_id", (req, res) => {
 })
 
 router.post("/user-all-joined-channels", (req, res) => {
-    // req.body: {
-    //   user_id: "",
-    //   workspace_id: ""
-    // }
     channelController.getAllUsersJoinedChannels(req.body.workspace_id, req.body.user_id)
         .then(docs => {
             if (docs === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)

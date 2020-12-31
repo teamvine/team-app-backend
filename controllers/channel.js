@@ -13,7 +13,7 @@ channelController.newChannel = async(channel) => {
     })
 };
 
-channelController.findChannel = async(properties = {}) => {
+channelController.findChannel = async(properties) => {
     return await ChannelModel.findOne(properties).then(doc => {
         return doc
     }).catch(() => {
@@ -82,7 +82,7 @@ channelController.AddNewMembersOrUpdate = async(workspace_id = "", channel_id = 
         }
 
     } catch (error) {
-        console.log(err)
+        console.log(error)
         return false
     }
 }

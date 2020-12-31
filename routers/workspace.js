@@ -146,10 +146,19 @@ router.post("/add-members/:workspace_id", async(req, res) => {
         })
     });
     let wrkspc_members = await workspaceController.AddNewMembersOrUpdate(workspace_id, newMembers)
+    let gen_channel = await channelController.findChannel({workspace_id: workspace_id,gen: true})
     if(wrkspc_members==false){
         return baseRouter.error(res, 200, errorMessage.DEFAULT)
     }else{
-        let gen_members = await channelController.AddNewMembersOrUpdate(workspace_id,"",newMembers,true)
+        let genMembers = []
+        newMembers.forEach(member => {
+            genMembers.push({
+                _id: member.user_id,
+                active: true,
+                joined_on: new Date()
+            })
+        });
+        let gen_members = await channelController.AddNewMembersOrUpdate(workspace_id,gen_channel._id,genMembers,false)
         return baseRouter.success(res, 200, { added_members: wrkspc_members, channel_members: gen_members}, "Members added!")
     }
 })

@@ -6,17 +6,16 @@ const _ = require('lodash')
 
 
 userController.findByName = (name) => {
-    return User.find({ $or: [{ last_name: new RegExp(name, "i") }, { first_name: new RegExp(name, "i") }] }, { //new RegExp(name, "i") yields /name/i
+    return User.find({ full_name: new RegExp(name, "i") }, { //new RegExp(name, "i") yields /name/i
             _id: 1,
-            first_name: 1,
-            last_name: 1,
+            full_name: 1,
             display_name: 1,
             profile_pic: 1,
             country: 1
         })
         .sort({
             last_name: 1
-        })
+        }).limit(10)
 }
 
 userController.findBy = (key, value) => {
@@ -95,6 +94,9 @@ userController.findByEmail = (email, password) => {
     }
     return User.findOne({ email: email })
 };
+userController.getByEmail= (email)=>{
+    return User.findOne({ email: email })
+}
 
 userController.updateUserAccount = async(user_id, fields) => {
     return await User.findOneAndUpdate({ _id: user_id }, fields, { new: true, useFindAndModify: false })

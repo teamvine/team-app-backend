@@ -4,12 +4,17 @@ const baseRouter = require("./baseRouter");
 const { User, UserJoiValidate } = require('../models/Users.mongodbShema')
 const UserController = require("../controllers/user");
 const workspaceController = require("../controllers/workspace")
+const {getAllUsersJoinedChannels} = require("../controllers/channel")
 const ID = require("../utils/codeGenerator")
 const auth = require("../passport-config");
 const { errorMessage, BCRYPT_SALT_ROUND } = require("../config/constants");
 const bcrypt = require('bcryptjs');
 const userController = require("../controllers/user");
 
+
+/**
+ * user Login
+ */
 router.post("/login", (req, res) => {
     console.log("#Login request received....")
     if (req.body.email == "" || req.body.password == "" || !req.body.email || !req.body.password) return baseRouter.error(res, 200, errorMessage.NO_EMAIL_OR_PASSWORD)
@@ -30,6 +35,10 @@ router.post("/login", (req, res) => {
     }
 });
 
+
+/**
+ * User register
+ */
 router.post("/register", async(req, res) => {
     console.log("#Register request received....")
     const newuser = req.body
@@ -56,6 +65,10 @@ router.post("/register", async(req, res) => {
     }
 });
 
+
+/**
+ * All data of a user on initial page load
+ */
 router.get("/verify-token", async(req, res) => {
     console.log("#Verify token request received....")
     if (!req.query.token || req.query.token == "") {
@@ -63,38 +76,42 @@ router.get("/verify-token", async(req, res) => {
     }
     try {
         const decoded = auth.verifyToken(req.query.token);
-        let userAppFlow = {
-            hasWorkspaces: false,
-            switchedWorkspaces: decoded.workspace_id == "" ? false : true,
-            currentWorkspace_id: decoded.workspace_id,
-            gotUserJoinedChannels: false,
-            gotUserDirectChatReceivers: false
+        let AllInfo = {
+            token: req.query.token,
+            user: {},
+            userAppFlow: {
+                hasWorkspaces: false,
+                switchedWorkspaces: decoded.workspace_id == "" ? false : true,
+                currentWorkspace_id: decoded.workspace_id,
+                gotUserJoinedChannels: false,
+                gotUserDirectChatReceivers: false
+            },
+            userWorkspaces: [],
+            currentWorkspace: {},
+            userChannels: [],
+            userContacts: []
         }
-        let userWorkspaces = []
-        let currentWorkspace = {}
-            //fetch user
-        let user = await UserController.getUserById(decoded.user_id);
-        user.password = ""
-            //fetch workspaces
-        await workspaceController.getUserWorkspaces(decoded.user_id)
-            .then(workspaces => {
-                if (workspaces !== false) {
-                    if (workspaces.length > 0) userAppFlow.hasWorkspaces = true
-                    userWorkspaces = workspaces
-                }
-            })
-        if (userAppFlow.switchedWorkspaces) {
-            await workspaceController.findWorkspaceById(userAppFlow.currentWorkspace_id)
-                .then(workspace => {
-                    if (workspace != false) currentWorkspace = workspace
-                })
+        //fetch user
+        AllInfo.user = await UserController.getUserById(decoded.user_id) || {};
+        AllInfo.user.password = ""
+        //fetch workspaces
+        AllInfo.userWorkspaces = await workspaceController.getUserWorkspaces(decoded.user_id) || []
+        if (AllInfo.userWorkspaces.length > 0) AllInfo.userAppFlow.hasWorkspaces = true
+        if (AllInfo.userAppFlow.switchedWorkspaces) {
+            AllInfo.currentWorkspace = await workspaceController.findWorkspaceById(AllInfo.userAppFlow.currentWorkspace_id) || {}
+            AllInfo.userChannels = await getAllUsersJoinedChannels(AllInfo.userAppFlow.currentWorkspace_id,decoded.user_id) || []
+            AllInfo.userContacts = await userController.getUserChats(AllInfo.userAppFlow.currentWorkspace_id,decoded.user_id) || []
         }
-        return baseRouter.success(res, 200, { user, userAppFlow, userWorkspaces, currentWorkspace }, "Account verification success!");
+        return baseRouter.success(res, 200, AllInfo, "Account verification success!");
     } catch (err) {
         return baseRouter.error(res, 200, errorMessage.DEFAULT);
     }
 });
 
+
+/**
+ * Verify email by code
+ */
 router.post("/verify_email",(req,res)=>{
     const {EMAIL_VERIFICATION_TEMPLATE} = require("../utils/constants")
     let code = ID(8).generate();
@@ -112,7 +129,7 @@ router.post("/verify_email",(req,res)=>{
         from: '"RCONNECT 👻" <rconnect250@gmail.com>',
         to: req.body.email,
         subject: "Email verification", 
-        text: `Hi ${req.body.fname+' '+req.body.lname}. Thank you for choosing RCONNECT. Your verification code is: ${code}`,
+        text: `Hi ${req.body.full_name}. Thank you for choosing RCONNECT. Your verification code is: ${code}`,
         // html: EMAIL_VERIFICATION_TEMPLATE.replace("USER_FULL_NAME",req.body.fname+' '+req.body.lname).replace("VERIFICATION_CODE",code)
       })
     }
@@ -124,8 +141,39 @@ router.post("/verify_email",(req,res)=>{
     })
 })
 
+
+/**
+ * Check if email is registered
+ */
+router.get("/check-email-taken/:email",(req,res)=>{
+    userController.getByEmail(req.params.email)
+    .then(doc=>{
+        if(doc!=null){
+            return res.send({
+                success: true,
+                emailUsed: true
+            })
+        }else{
+            return res.send({
+                success: true,
+                emailUsed: false
+            })
+        }
+    })
+    .catch((err)=>{
+        return res.send({
+            success: false,
+            emailUsed: true,
+        })
+    })
+})
+
 router.use(auth.jwtAuth)
 
+
+/**
+ * Get user info by id
+ */
 router.get("/user-by-id/:user_id", (req, res) => {
     console.log("#get User by Id request received...");
     UserController.getUserById(req.params.user_id)
@@ -140,16 +188,32 @@ router.get("/check-user-for-chat", (req, res) => {
     return res.send("yes")
 })
 
+
+/**
+ * Switch to a workspace: add it to token and get its user's data
+ */
 router.post("/switch-workspace", async(req, res) => {
     console.log("#switch workspace request received...")
     const workspace = req.body.workspace
+    let AllInfo = {
+        token: "",
+        workspace: workspace,
+        channels: [],
+        contacts: []
+    }
     if (!workspace || !workspace._id || workspace._id == "") {
         if (req.body.NEW == true) return baseRouter.error(res, 200, "No new workspace provided!");
     }
-    const newToken = auth.switchWorkspace(req.body.token, req.body.workspace)
-    return baseRouter.success(res, 200, { token: newToken }, "Workspace switched successfully!")
+    AllInfo.token = auth.switchWorkspace(req.body.token, req.body.workspace)
+    AllInfo.channels = await getAllUsersJoinedChannels(workspace._id,req.body.user_id) || []
+    AllInfo.contacts = await userController.getUserChats(workspace._id,req.body.user_id) || []
+    return baseRouter.success(res, 200, AllInfo, "Workspace switched successfully!")
 })
 
+
+/**
+ * Search users by name
+ */
 router.get("/by-name/:name", async(req, res) => {
     console.log("#find user by name request received..")
     let name = req.params.name
@@ -162,6 +226,10 @@ router.get("/by-name/:name", async(req, res) => {
         })
 })
 
+
+/**
+ * Add or update user contacts
+ */
 router.post("/add-or-update-user-chats", (req, res) => {
     const info = req.body //{user_id: null,workspace_id: null,chats: []}
     userController.AddNewUserChatsOrUpdate(info.workspace_id, info.user_id, info.chats)
@@ -171,6 +239,10 @@ router.post("/add-or-update-user-chats", (req, res) => {
         })
 })
 
+
+/**
+ * Get user contacts
+ */
 router.get("/get-user-chats", (req, res) => {
     userController.getUserChats(req.query.workspace_id, req.query.user_id).then(chats => {
         if (chats === false) return baseRouter.error(res, 200, errorMessage.DEFAULT + " Or may be that record doesn't exist!")
@@ -180,6 +252,10 @@ router.get("/get-user-chats", (req, res) => {
     })
 })
 
+
+/**
+ * Get a given user account info
+ */
 router.post("/account-info", async(req, res) => {
     console.log("#get User info request received...");
     let account = {}
@@ -212,11 +288,13 @@ router.post("/account-info", async(req, res) => {
                 someErr = true
             })
     }
-    // console.log("account: ", account)
     if (someErr) return baseRouter.success(res, 200, { success: false, account: account }, "Something went wrong!")
     return baseRouter.success(res, 200, { success: true, account: account }, "Request successful")
 })
 
+/**
+ * Update user account info
+ */
 router.put("/update-account", (req, res) => {
     console.log("#update account requesr received...");
     let fields = {}
@@ -244,4 +322,6 @@ router.put("/update-account", (req, res) => {
             })
     }
 })
+
+
 module.exports = router;

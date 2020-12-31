@@ -27,7 +27,14 @@ const WorkspacesSchema = new mongoose.Schema({
     created: {
         type: Date,
         required: true
+    },
+    code: {
+        type: String,
+        required: true
     }
+},
+{
+    timestamps: true
 });
 
 const workspaceJoiValidate = function(obj) {
@@ -36,7 +43,8 @@ const workspaceJoiValidate = function(obj) {
 		description: Joi.string().required(),
         admin_id: Joi.string().required(),
         type: Joi.string().required(),
-		created: Joi.date().required()
+        created: Joi.date().required(),
+        code: Joi.string().required()
 	})
 	return schema.validate(obj);
 }

@@ -3,12 +3,7 @@ var Joi = require('joi');
 var passwdRegex = require('../config/constants').regExp.VALID_PASSWORD
 
 const UsersSchema = new mongoose.Schema({
-    first_name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    last_name: {
+    full_name: {
         type: String,
         required: true,
         trim: true
@@ -58,12 +53,14 @@ const UsersSchema = new mongoose.Schema({
         type: Date,
         required: true
     }
+},
+{
+    timestamps: true
 });
 
 module.exports.UserJoiValidate = function(obj) {
     var schema = Joi.object({
-        first_name: Joi.string().required(),
-        last_name: Joi.string().required(),
+        full_name: Joi.string().required(),
         display_name: Joi.string().min(4).max(30).required(),
         email: Joi.string().email().required(),
         password: Joi.string().min(6).max(30).regex(passwdRegex).required(),

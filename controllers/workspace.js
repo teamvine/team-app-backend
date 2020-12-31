@@ -6,6 +6,12 @@ const userController = require("./user");
 const channelController = require('./channel');
 const _ = require('lodash')
 
+
+/**
+ * Create a new workspace
+ * @param {Object} workspace workspace info object
+ * @returns A new created workspace document or false in case of error
+ */
 workspaceController.createNewWorkspace = async(workspace = {}) => {
     var new_workspace = new workspaceModel(workspace)
     return await new_workspace.save().then(workspc => {
@@ -15,6 +21,12 @@ workspaceController.createNewWorkspace = async(workspace = {}) => {
     })
 }
 
+
+/**
+ * Get a workspace based on given properties
+ * @param {Object} properties query properties
+ * @returns workspace document or false in case of error
+ */
 workspaceController.findWorkspace = async(properties = {}) => {
     return await workspaceModel.findOne(properties).then(doc => {
         return doc
@@ -23,7 +35,13 @@ workspaceController.findWorkspace = async(properties = {}) => {
     })
 }
 
-//add a new member or update
+
+/**
+ * add a new member or update
+ * @param {String} workspace_id workspace id
+ * @param {String} newMembers new mebers array with _id
+ * @returns members or false in case of error
+ */
 workspaceController.AddNewMembersOrUpdate = async(workspace_id, newMembers = [{ user_id: "", active: true, joined_on: Date() }]) => {
     try {
         // newMembers = [{ user_id: "", active: true }]
@@ -37,7 +55,6 @@ workspaceController.AddNewMembersOrUpdate = async(workspace_id, newMembers = [{ 
             console.log("new ", members)
             return await members.save()
         } else {
-            console.log(members)
             for (let i = 0; i < members.members.length; i++) {
                 for (let index = 0; index < newMembers.length; index++) {
                     if (members.members[i].user_id == newMembers[index].user_id) {
@@ -58,7 +75,13 @@ workspaceController.AddNewMembersOrUpdate = async(workspace_id, newMembers = [{ 
     }
 }
 
-//this function will return all members of a workspace
+
+
+/**
+ * Get all members of a workspace
+ * @param {String} workspace_id workspace id
+ * @returns workspace all members or false in case of error
+ */
 workspaceController.getAllMembers = (workspace_id) => {
     let members = []
     return workspaceMemberModel.findOne({ workspace_id: workspace_id })
@@ -79,7 +102,12 @@ workspaceController.getAllMembers = (workspace_id) => {
         })
 }
 
-//get all workspaces of a user
+
+/**
+ * Get user's all joined workspaces
+ * @param {String} user_id user id
+ * @returns workspaces array or false in case of error
+ */
 workspaceController.getUserWorkspaces = async(user_id) => {
     let workspaces = []
     return await workspaceMemberModel.find({ 'members.user_id': user_id, 'members.active': true })
@@ -100,6 +128,12 @@ workspaceController.getUserWorkspaces = async(user_id) => {
         })
 }
 
+
+/**
+ * get a workspace using its id
+ * @param {String} workspace_id workspace id
+ * @returns workspace document or false in case of error
+ */
 workspaceController.findWorkspaceById = async(workspace_id) => {
     return await workspaceModel.findById(workspace_id)
         .then(doc => {
@@ -109,6 +143,12 @@ workspaceController.findWorkspaceById = async(workspace_id) => {
         })
 }
 
+
+/**
+ * get all channels in a workspace
+ * @param {String} workspace_id workspace id
+ * @returns workspace channels document array or false in case of error
+ */
 workspaceController.getWorkspaceAllChannels = async(workspace_id) => {
     return await channelController.getAllChannelsInWorkspace(workspace_id)
         .then(docs => {
@@ -118,7 +158,14 @@ workspaceController.getWorkspaceAllChannels = async(workspace_id) => {
         })
 }
 
-//search a member by any name
+
+/**
+ * Search workspaces members using their names
+ * @param {String} workspace_id workspace id
+ * @param {String} user_id user id
+ * @param {String} search_srting a search text(full_name or display name)
+ * @returns workspace members documents in an array or false in case of error
+ */
 workspaceController.searchMembersByName = async(workspace_id, user_id, search_srting) => {
     return await workspaceController.getAllMembers(workspace_id)
         .then(members => {
@@ -126,11 +173,8 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
             let filtered = []
             let found = []
             members.forEach(member => {
-                let fullname = member.first_name.toString() + " " + member.last_name.toString()
                 if (
-                    member.first_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0 ||
-                    member.last_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0 ||
-                    fullname.toLowerCase().indexOf(search_srting.toLowerCase()) >= 0 ||
+                    member.full_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0 ||
                     member.display_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0
                 ) {
                     if (member._id.toString() != user_id.toString()) {
@@ -147,76 +191,29 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
         })
 }
 
-// workspaceController.addMembers = async(workspace_id = "", members = []) => {
-//     let docs_to_instert = []
-//     members.map((member) => {
-//         docs_to_instert.push({
-//             user_id: member._id.toString(),
-//             workspace_id: workspace_id.toString(),
-//             joined_on: Date()
-//         })
-//     })
-//     return workspaceMemberModel.collection.insertMany(docs_to_instert).then(docs => {
-//         return docs
-//     }).catch(() => {
-//         return false
-//     })
-// }
 
 
-// workspaceController.getWorkspaceAllMembers = async(workspace_id) => {
-//     let members = []
-//     return await workspaceMemberModel.find({ workspace_id: workspace_id })
-//         .then(async(docs) => {
-//             if (docs.length < 1) {
-//                 return members
-//             } else {
-//                 for (let i = 0; i < docs.length; i++) {
-//                     await userController.getUserById(docs[i].user_id).then(user => {
-//                         user.password = ""
-//                         members.push(user)
-//                     })
-//                 }
-//                 return members
-//             }
-//         }).catch((err) => {
-//             console.log(err)
-//             return false
-//         })
-// }
-
-// workspaceController.getUsersAllWorkspaces = async(user_id) => {
-//     let workspaces = []
-//     return await workspaceMemberModel.find({ user_id: user_id })
-//         .then(async(docs) => {
-//             if (docs.length < 1) {
-//                 return workspaces
-//             } else {
-//                 for (let i = 0; i < docs.length; i++) {
-//                     await workspaceController.findWorkspaceById(docs[i].workspace_id).then(workspace => {
-//                         if (workspace != false) workspaces.push(workspace)
-//                     })
-//                 }
-//                 return workspaces
-//             }
-//         }).catch((err) => {
-//             console.log(err)
-//             return false
-//         })
-// }
-
-workspaceController.findByName = async(name)=>{
+/**
+ * Search public workspaces using their names
+ * @param {String} name workspace's name
+ * @returns An array of workspaces(Objects)-limit 10
+ */
+workspaceController.SearchPublicByName = async(name)=>{
     return await workspaceModel.find({ name: new RegExp(name, "i") ,type: "public" }, { //new RegExp(name, "i") yields /name/i
             _id: 1,
             name: 1,
             description: 1,
             admin_id: 1,
             created: 1,
+<<<<<<< HEAD
             type: 1
+=======
+            code: 1
+>>>>>>> 57cf528f8e95b375773494682e01408ac55fa942
         })
         .sort({
             name: 1
-        })
+        }).limit(10)
 }
 
 module.exports = workspaceController;

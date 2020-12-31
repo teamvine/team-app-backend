@@ -2,13 +2,17 @@ const router = require("express").Router();
 const baseRouter = require("./baseRouter");
 const auth = require("../passport-config")
 const { errorMessage } = require("../config/constants");
-const { workspaceModel, workspaceJoiValidate } = require('../models/Workspaces.mongdbSchema')
-    // const workspaceMemberModel = require ('../models/WorkspacesMembers.mongodbSchema');
+const { workspaceJoiValidate } = require('../models/Workspaces.mongdbSchema')
 const workspaceController = require("../controllers/workspace");
 const channelController = require("../controllers/channel");
+const IDgen = require("../utils/codeGenerator")
 
 router.use(auth.jwtAuth)
 
+
+/**
+ * Register an new Workspace
+ */
 router.post("/new-workspace", async(req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = auth.verifyToken(token)
@@ -16,6 +20,7 @@ router.post("/new-workspace", async(req, res) => {
         //validate received workspace
     let newWorkspace = req.body.workspace
     newWorkspace.info.created = Date()
+    newWorkspace.info.code = IDgen(13).generate()
     if (workspaceJoiValidate(newWorkspace.info).error != undefined) {
         const err = workspaceJoiValidate(newWorkspace.info).error.details[0].message
         return baseRouter.error(res, 200, err.toString().replace(/"/gi, ""));
@@ -25,9 +30,6 @@ router.post("/new-workspace", async(req, res) => {
         name: req.body.workspace.info.name
     }).then(sameWorkspace => {
         if (sameWorkspace) return baseRouter.error(res, 200, "That workspace is already registered!")
-            // console.log(sameWorkspace)
-            // console.log("way to go")
-            //if not found create it
         workspaceController.createNewWorkspace(newWorkspace.info)
             .then(workspace => {
                 newWorkspace.info = workspace
@@ -39,13 +41,16 @@ router.post("/new-workspace", async(req, res) => {
                     admin_id: decoded.user_id,
                     workspace_id: newWorkspace.info._id.toString(),
                     type: "public",
-                    created: Date()
+                    created: Date(),
+                    workspace_code: newWorkspace.info.code,
+                    channel_code: IDgen(15).generate()
                 }).then(result => {
                     if (result != false) newWorkspace.channels = [result]
                         // if created general add members to general
                         //if created gneral channel, add members to workspace
                     if (newWorkspace.members.length > 0) {
                         let newMembers = []
+                        newWorkspace.members = newWorkspace.members.sort(() => Math.random() - 0.5) //shuffle members
                         newWorkspace.members.forEach(member => {
                             newMembers.push({
                                 user_id: member._id.toString(),
@@ -53,12 +58,10 @@ router.post("/new-workspace", async(req, res) => {
                                 joined_on: Date()
                             })
                         });
+                        newMembers = newMembers.sort(() => Math.random() - 0.5) //shuffle members again
                         workspaceController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), newMembers)
                             .then(members => {
                                 if (!members) return baseRouter.success(res, 200, { info: newWorkspace.info }, "Workspace created but Failed to add members! Add them manually.")
-                                    // newWorkspace.members = members
-                                    // console.log("okay here")
-                                    // console.log(newWorkspace.members)
                                 channelController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), result._id.toString(), newWorkspace.members)
                                     .then(generalMembers => {
                                         if (!generalMembers) return baseRouter.success(res, 200, { info: newWorkspace.info }, "Workspace created but Failed to add members to general channel! Add them manually.")
@@ -75,6 +78,11 @@ router.post("/new-workspace", async(req, res) => {
     })
 });
 
+
+
+/**
+ *  Get workspace info by id
+ */
 router.get("/workspace-by-id/:workspace_id", async(req, res) => {
     await workspaceController.findWorkspaceById(req.params.workspace_id)
         .then(doc => {
@@ -83,6 +91,10 @@ router.get("/workspace-by-id/:workspace_id", async(req, res) => {
         })
 })
 
+
+/**
+ * Get workspace's all members using its id
+ */
 router.get("/all-members/:workspace_id", async(req, res) => {
     await workspaceController.getAllMembers(req.params.workspace_id)
         .then(members => {
@@ -91,6 +103,10 @@ router.get("/all-members/:workspace_id", async(req, res) => {
         })
 })
 
+
+/**
+ * get all Workspace's channels using its id
+ */
 router.get("/all-channels/:workspace_id", async(req, res) => {
     await workspaceController.getWorkspaceAllChannels(req.params.workspace_id)
         .then(channels => {
@@ -99,6 +115,11 @@ router.get("/all-channels/:workspace_id", async(req, res) => {
         })
 })
 
+
+
+/**
+ * get user's All Joined workspaces using his/her id
+ */
 router.get("/user-all-workspaces/:user_id", async(req, res) => {
     await workspaceController.getUserWorkspaces(req.params.user_id)
         .then(workspaces => {
@@ -107,7 +128,12 @@ router.get("/user-all-workspaces/:user_id", async(req, res) => {
         })
 })
 
-router.get("/add-members/:workspace_id", async(req, res) => {
+
+
+/**
+ * Add members to a workspace using its id
+ */
+router.post("/add-members/:workspace_id", async(req, res) => {
     const workspace_id = req.params.workspace_id
     const members = req.body.members //as array
     let newMembers = []
@@ -115,17 +141,20 @@ router.get("/add-members/:workspace_id", async(req, res) => {
         newMembers.push({
             user_id: member._id.toString(),
             active: true,
-            joined_on: Date()
+            joined_on: new Date()
         })
     });
     workspaceController.AddNewMembersOrUpdate(workspace_id, newMembers)
-        .then(docs => {
-            // console.log(docs)
-            if (docs === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-            return baseRouter.success(res, 200, { added_members: docs }, "Members added!")
-        })
+    .then(docs => {
+        if (docs === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
+        return baseRouter.success(res, 200, { added_members: docs }, "Members added!")
+    })
 })
 
+
+/**
+ * search members by name from a workspace
+ */
 router.get("/search-members-by-name", (req, res) => {
     workspaceController.searchMembersByName(req.query.workspace_id, req.query.user_id, req.query.search_string)
         .then(users => {
@@ -134,15 +163,21 @@ router.get("/search-members-by-name", (req, res) => {
         })
 })
 
+
+
+/**
+ * Search public workspaces using their names
+ */
 router.get("/public-by-name/:name", async(req, res) => {
     console.log("#find workspace by name request received..")
     let name = req.params.name
-    workspaceController.findByName(name)
-        .then(doc => {
-            return baseRouter.success(res, 200, doc)
+    workspaceController.SearchPublicByName(name)
+        .then(docs => {
+            if(docs==null) return baseRouter.success(res, 200, {success: true,results: []});
+            return baseRouter.success(res, 200, {success: true,results: docs})
         })
         .catch(err => {
-            return baseRouter.error(res, 200, "No People found with their names containing that text.")
+            return baseRouter.error(res, 200, "No Organizations found with their names containing that text.")
         })
 })
 

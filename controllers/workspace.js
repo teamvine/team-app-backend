@@ -44,8 +44,6 @@ workspaceController.findWorkspace = async(properties = {}) => {
  */
 workspaceController.AddNewMembersOrUpdate = async(workspace_id, newMembers = [{ user_id: "", active: true, joined_on: Date() }]) => {
     try {
-        // newMembers = [{ user_id: "", active: true }]
-        console.log(newMembers)
         let members = await workspaceMemberModel.findOne({ workspace_id: workspace_id })
         if (members == null) {
             members = new workspaceMemberModel({

@@ -12,6 +12,11 @@ const ChannelsMembersSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    gen: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     members: {
         type: Array,
         required: true

@@ -43,7 +43,8 @@ router.post("/new-workspace", async(req, res) => {
                     type: "public",
                     created: Date(),
                     workspace_code: newWorkspace.info.code,
-                    channel_code: IDgen(15).generate()
+                    channel_code: IDgen(15).generate(),
+                    gen: true
                 }).then(result => {
                     if (result != false) newWorkspace.channels = [result]
                         // if created general add members to general
@@ -62,7 +63,7 @@ router.post("/new-workspace", async(req, res) => {
                         workspaceController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), newMembers)
                             .then(members => {
                                 if (!members) return baseRouter.success(res, 200, { info: newWorkspace.info }, "Workspace created but Failed to add members! Add them manually.")
-                                channelController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), result._id.toString(), newWorkspace.members)
+                                channelController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), result._id.toString(), newWorkspace.members,false)
                                     .then(generalMembers => {
                                         if (!generalMembers) return baseRouter.success(res, 200, { info: newWorkspace.info }, "Workspace created but Failed to add members to general channel! Add them manually.")
                                         return baseRouter.success(res, 200, newWorkspace, "Workspace created Successfully!")
@@ -144,11 +145,13 @@ router.post("/add-members/:workspace_id", async(req, res) => {
             joined_on: new Date()
         })
     });
-    workspaceController.AddNewMembersOrUpdate(workspace_id, newMembers)
-    .then(docs => {
-        if (docs === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-        return baseRouter.success(res, 200, { added_members: docs }, "Members added!")
-    })
+    let wrkspc_members = await workspaceController.AddNewMembersOrUpdate(workspace_id, newMembers)
+    if(wrkspc_members==false){
+        return baseRouter.error(res, 200, errorMessage.DEFAULT)
+    }else{
+        let gen_members = await channelController.AddNewMembersOrUpdate(workspace_id,"",newMembers,true)
+        return baseRouter.success(res, 200, { added_members: wrkspc_members, channel_members: gen_members}, "Members added!")
+    }
 })
 
 

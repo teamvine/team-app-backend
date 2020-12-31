@@ -30,7 +30,14 @@ channelController.findChannelById = async(channel_id) => {
         })
 }
 
-channelController.AddNewMembersOrUpdate = async(workspace_id = "", channel_id = "", members = []) => {
+/**
+ * Add new members or update
+ * @param {String} workspace_id
+ * @param {String} channel_id 
+ * @param {Array} members 
+ * @param {Boolean} gen 
+ */
+channelController.AddNewMembersOrUpdate = async(workspace_id = "", channel_id = "", members = [],gen) => {
     let docs_to_instert = []
     members.map((member) => {
         docs_to_instert.push({
@@ -40,17 +47,21 @@ channelController.AddNewMembersOrUpdate = async(workspace_id = "", channel_id = 
         })
     })
     try {
-        let members = await ChannelMembersModel.findOne({ workspace_id: workspace_id, channel_id: channel_id })
+        let members;
+        if(gen==true){
+            members = await ChannelMembersModel.findOne({ workspace_id: workspace_id, gen: gen})
+        }else{
+            members = await ChannelMembersModel.findOne({workspace_id: workspace_id, channel_id: channel_id })
+        }
         if (members == null) {
             members = new ChannelMembersModel({
                     channel_id: channel_id,
                     workspace_id: workspace_id,
-                    members: docs_to_instert
+                    members: docs_to_instert,
+                    gen: gen
                 })
-                // console.log("new ", members)
             return await members.save()
         } else {
-            // console.log(members)
             for (let i = 0; i < members.members.length; i++) {
                 for (let index = 0; index < docs_to_instert.length; index++) {
                     if (members.members[i].user_id == docs_to_instert[index].user_id) {
@@ -62,7 +73,11 @@ channelController.AddNewMembersOrUpdate = async(workspace_id = "", channel_id = 
             for (let index = 0; index < docs_to_instert.length; index++) {
                 members.members.push(docs_to_instert[index])
             }
-            members = await ChannelMembersModel.findOneAndUpdate({ workspace_id: workspace_id, channel_id: channel_id }, { members: members.members }, { new: true, useFindAndModify: false })
+            if(gen==true){
+                members = await ChannelMembersModel.findOneAndUpdate({workspace_id: workspace_id, gen: gen}, {members: members.members}, { new: true, useFindAndModify: false })
+            }else{
+                members = await ChannelMembersModel.findOneAndUpdate({workspace_id: workspace_id, channel_id: channel_id}, { members: members.members }, { new: true, useFindAndModify: false })
+            }
             return members
         }
 

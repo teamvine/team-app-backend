@@ -198,15 +198,17 @@ router.post("/switch-workspace", async(req, res) => {
     let AllInfo = {
         token: "",
         workspace: workspace,
-        channels: [],
-        contacts: []
+        userChannels: [],
+        userContacts: []
     }
     if (!workspace || !workspace._id || workspace._id == "") {
         if (req.body.NEW == true) return baseRouter.error(res, 200, "No new workspace provided!");
     }
     AllInfo.token = auth.switchWorkspace(req.body.token, req.body.workspace)
-    AllInfo.channels = await getAllUsersJoinedChannels(workspace._id,req.body.user_id) || []
-    AllInfo.contacts = await userController.getUserChats(workspace._id,req.body.user_id) || []
+    let ch = await getAllUsersJoinedChannels(workspace._id,req.body.user_id)
+    let cnt = await userController.getUserChats(workspace._id,req.body.user_id)
+    AllInfo.userChannels = ch
+    AllInfo.userContacts = cnt
     return baseRouter.success(res, 200, AllInfo, "Workspace switched successfully!")
 })
 

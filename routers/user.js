@@ -193,7 +193,7 @@ router.get("/check-user-for-chat", (req, res) => {
  * Switch to a workspace: add it to token and get its user's data
  */
 router.post("/switch-workspace", async(req, res) => {
-    console.log("#switch workspace request received...")
+    console.log("#switch to workspace request received...")
     const workspace = req.body.workspace
     let AllInfo = {
         token: "",

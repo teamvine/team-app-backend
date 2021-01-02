@@ -165,10 +165,10 @@ router.post("/add-members/:workspace_id", async(req, res) => {
 
 
 /**
- * search members by name from a workspace
+ * search members by name or role from a workspace
  */
 router.get("/search-members-by-name", (req, res) => {
-    workspaceController.searchMembersByName(req.query.workspace_id, req.query.user_id, req.query.search_string)
+    workspaceController.searchMembersByNameOrRole(req.query.workspace_id, req.query.user_id, req.query.search_string)
         .then(users => {
             if (users == false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
             return baseRouter.success(res, 200, { filtered_members: users }, "Users filtered successfully!")

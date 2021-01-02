@@ -90,7 +90,7 @@ workspaceController.getAllMembers = (workspace_id) => {
                 if (doc.members[index].active == true) {
                     await User.findById(doc.members[index].user_id)
                         .then(user => {
-                            members.push(_.pick(user, ["_id", "first_name", "last_name", "profile_pic", "display_name", "phone", "country", "email"]))
+                            members.push(_.pick(user, ["_id", "full_name", "profile_pic", "display_name", "phone", "country", "email"]))
                         })
                 }
             }
@@ -158,13 +158,13 @@ workspaceController.getWorkspaceAllChannels = async(workspace_id) => {
 
 
 /**
- * Search workspaces members using their names
+ * Search workspaces members using their names and roles
  * @param {String} workspace_id workspace id
  * @param {String} user_id user id
- * @param {String} search_srting a search text(full_name or display name)
+ * @param {String} search_srting a search text(full_name or display name or role)
  * @returns workspace members documents in an array or false in case of error
  */
-workspaceController.searchMembersByName = async(workspace_id, user_id, search_srting) => {
+workspaceController.searchMembersByNameOrRole = async(workspace_id, user_id, search_srting) => {
     return await workspaceController.getAllMembers(workspace_id)
         .then(members => {
             if (members === false) return false
@@ -172,8 +172,8 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
             let found = []
             members.forEach(member => {
                 if (
-                    member.full_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0 ||
-                    member.display_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0
+                    member.full_name.toString().toLowerCase().includes(search_srting.toLowerCase()) ||
+                    member.display_name.toString().toLowerCase().includes(search_srting.toLowerCase())
                 ) {
                     if (member._id.toString() != user_id.toString()) {
                         filtered.push(member)
@@ -181,7 +181,7 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
                 }
             })
             let i = 0;
-            while (filtered[i] && i < 10) {
+            while (filtered[i] && i < 20) {
                 found.push(filtered[i])
                 i++;
             }

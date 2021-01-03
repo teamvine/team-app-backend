@@ -2,6 +2,7 @@ const personalMessageController = {};
 const _ = require('lodash')
 const { DirectMessagesModel, DirectMessagesJoiValidate } = require('../models/DirectMessages.mongodbSchema')
 const personalMessageRepliesController = require('../controllers/personalMessageReplies')
+const userController = require("./user")
 
 
 /**
@@ -62,6 +63,8 @@ personalMessageController.getPersonalChatMessages = async(workspace_id, user_id,
                     .then(replies => {
                         message.replies = replies
                     })
+                let sender_info = await userController.getUserById(message.sender_id)
+                message.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
                 allSms.push(message)
             }
             return allSms.reverse();
@@ -92,6 +95,8 @@ personalMessageController.getFewOlderMessages = async(workspace_id, user_id, par
                     .then(replies => {
                         message.replies = replies
                     })
+                let sender_info = await userController.getUserById(message.sender_id)
+                message.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
                 allSms.push(message)
             }
             return allSms.reverse();

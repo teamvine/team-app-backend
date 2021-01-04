@@ -139,4 +139,23 @@ channelController.getAllUsersJoinedChannels = async(workspace_id, user_id) => {
         })
 }
 
+/**
+ * search public channels using names
+ * @param {String} workspace_id 
+ * @param {String} search_text 
+ */
+channelController.searchPublicChannelsByName = async(workspace_id,search_text)=>{
+    return await ChannelModel.find({workspace_id: workspace_id,type: "public",name: new RegExp(search_text, "i")},{
+        _id: 1,
+        name: 1,
+		description: 1,
+        admin_id: 1,
+        type: 1,
+        created: 1,
+        channel_code: 1
+    }).sort({
+        name: 1
+    }).limit(10)
+}
+
 module.exports = channelController;

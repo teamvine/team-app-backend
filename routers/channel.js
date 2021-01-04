@@ -76,4 +76,14 @@ router.get("/all-members", async(req, res) => {
             return baseRouter.success(res, 200, { channel_members: members }, "Members were got successfully!")
         })
 })
+
+
+router.get("/search-public-by-name", async(req,res)=>{
+    await channelController.searchPublicChannelsByName(req.query.workspace_id,req.query.text)
+    .then(channels=>{
+        if(!channels) return baseRouter.success(res,200,{channels: channels},"Something went wrong")
+        baseRouter.success(res,200,{channels: channels},"Request successfull")
+    })
+})
+
 module.exports = router;

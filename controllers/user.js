@@ -14,7 +14,7 @@ userController.findByName = (name) => {
             country: 1
         })
         .sort({
-            last_name: 1
+            full_name: 1
         }).limit(10)
 }
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const bcrypt = require('bcryptjs');
 
 // production! mongodb atlas
 const connection = mongoose.connect('mongodb+srv://egide:8QVEpKfW8r2UVPsw@devdbs.xcnlk.gcp.mongodb.net/teamDb?retryWrites=true&w=majority', {
@@ -19,3 +20,6 @@ const connection = mongoose.connect('mongodb+srv://egide:8QVEpKfW8r2UVPsw@devdbs
 // }).catch(()=>{
 //     console.log("#Failed to connect to mongodb...")
 // })
+
+// console.log(bcrypt.hashSync("123456",2))
+// console.log(Date())

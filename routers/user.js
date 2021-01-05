@@ -113,6 +113,7 @@ router.get("/verify-token", async(req, res) => {
  * Verify email by code
  */
 router.post("/verify_email",(req,res)=>{
+    console.log("#verify email request received...");
     const {EMAIL_VERIFICATION_TEMPLATE} = require("../utils/constants")
     let code = ID(8).generate();
     async function main() {
@@ -123,7 +124,7 @@ router.post("/verify_email",(req,res)=>{
           pass: "chatever50", 
         },
         // debug: true,
-        // logger: true
+        logger: true
       });
       let info = await transporter.sendMail({
         from: '"RCONNECT 👻" <rconnect250@gmail.com>',

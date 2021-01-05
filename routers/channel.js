@@ -37,6 +37,7 @@ router.post("/new-channel", async(req, res) => {
 })
 
 router.post("/add-members", async(req, res) => {
+    console.log("#join channel request...")
     // req.body: {
     //   channel_id: "",
     //   workspace_id: "",

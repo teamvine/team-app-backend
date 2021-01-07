@@ -54,6 +54,7 @@ router.get("/",(req,res)=>{
 })
 
 
+
 client_server.use("/.netlify/functions/index", router)
 client_server.use("/.netlify/functions/api",api)
 client_server.use(history());

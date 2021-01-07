@@ -1,10 +1,9 @@
 "use strict";
 
-// =======IMPORT AND INITIALIZE ALL REQUIRED MODULES==========
 require('./mongodb/index')
 const express = require("express");
 const client_server = express();
-const CLIENT_SERVER = require("http").createServer(client_server);
+const serverLess = require("serverless-http")
 const cors = require("cors");
 const UserRouter = require("./routers/user");
 const ChannelRouter = require("./routers/channel");
@@ -18,7 +17,6 @@ const upload = require("multer")({
 const cors_opts = {}
 const history = require("connect-history-api-fallback");
 const passport = require("passport");
-// ===========================================
 
 
 
@@ -47,9 +45,12 @@ client_server.use(history());
 
 
 
-//==========ATTACH SERVERS ON PORTS=========
 const CLIENT_SERVER_PORT = process.env.PORT || 3000;
-CLIENT_SERVER.listen(CLIENT_SERVER_PORT, function() {
+client_server.listen(CLIENT_SERVER_PORT, function() {
     console.log(`#CLIENT_SERVER is listening on port: ${CLIENT_SERVER_PORT}`);
 });
-// ==========================================
+
+
+//========================FOR NETLIFY==================
+module.exports = client_server
+module.exports.handler = serverLess(client_server)

@@ -1,18 +1,18 @@
 "use strict";
 
-require('./mongodb/index')
+require('../mongodb/index')
 const express = require("express");
 const client_server = express();
 const serverLess = require("serverless-http")
 const cors = require("cors");
-const UserRouter = require("./routers/user");
-const ChannelRouter = require("./routers/channel");
-const MessagesRouter = require("./routers/messages")
-const WorkspaceRouter = require("./routers/workspace");
+const UserRouter = require("../routers/user");
+const ChannelRouter = require("../routers/channel");
+const MessagesRouter = require("../routers/messages")
+const WorkspaceRouter = require("../routers/workspace");
 const path = require("path");
 const bodyParser = require('body-parser');
 const upload = require("multer")({
-    dest: "./public/images"
+    dest: "../public/images"
 });
 const cors_opts = {}
 const history = require("connect-history-api-fallback");

@@ -11,6 +11,7 @@ const MessagesRouter = require("./messages")
 const WorkspaceRouter = require("./workspace");
 const path = require("path");
 const bodyParser = require('body-parser');
+const api = require("./api")
 const upload = require("multer")({
     dest: "../public/images"
 });
@@ -54,6 +55,7 @@ router.get("/",(req,res)=>{
 
 
 client_server.use("/.netlify/functions/index", router)
+client_server.use("/.netlify/functions/api",api)
 client_server.use(history());
 
 

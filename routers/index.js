@@ -29,7 +29,6 @@ client_server.use(bodyParser.urlencoded({ extended: true }))
 client_server.use(bodyParser.json())
 
 // ================For Express==========
-client_server.use("/public", express.static(path.join(__dirname, "/public/")));
 client_server.use("/user", UserRouter);
 client_server.use("/channel", ChannelRouter);
 client_server.use("/workspace", WorkspaceRouter);

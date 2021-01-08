@@ -10,11 +10,12 @@ const MessagesRouter = require("./routers/messages")
 const WorkspaceRouter = require("./routers/workspace");
 const bodyParser = require('body-parser');
 const upload = require("multer")({
-    dest: "../public/images"
+    dest: "./public/images"
 });
 const cors_opts = {}
 const history = require("connect-history-api-fallback");
 const passport = require("passport");
+const path = require("path");
 
 
 
@@ -26,6 +27,8 @@ client_server.use(bodyParser.urlencoded({ extended: true }))
 client_server.use(bodyParser.json())
 
 // ================For Express==========
+client_server.use("/public", express.static(path.join(__dirname, "/public/")));
+express.static(path.join(__dirname, "/"))
 client_server.use("/user", UserRouter);
 client_server.use("/channel", ChannelRouter);
 client_server.use("/workspace", WorkspaceRouter);

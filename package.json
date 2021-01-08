@@ -6,9 +6,7 @@
   "repository": "https://gitlab.com/egideharerimana085/team-back-end-v2.git",
   "author": "Harerimana Egide",
   "scripts": {
-    "build": "netlify-lambda build routers",
-    "serve": "netlify-lambda serve routers",
-    "start": "nodemon routers/index.js",
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

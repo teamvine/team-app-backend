@@ -38,9 +38,6 @@ client_server.get("/",(req,res)=>{
 })
 client_server.use(history());
 
-
-
-
 const CLIENT_SERVER_PORT = process.env.PORT || 3000;
 client_server.listen(CLIENT_SERVER_PORT, function() {
     console.log(`#CLIENT_SERVER is listening on port: ${CLIENT_SERVER_PORT}`);

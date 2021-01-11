@@ -176,6 +176,20 @@ router.get("/search-members-by-name", (req, res) => {
 })
 
 
+// search workspace members that are not in a given channel
+router.get("/search-members-notInChannel", (req,res)=>{
+    let workspace_id = req.query.workspace_id
+    let channel_id = req.query.channel_id
+    let user_id = req.query.user_id
+    let search_string = req.query.search_string
+    workspaceController.searchMembersNotInChannel(workspace_id,channel_id,user_id,search_string)
+    .then(users=>{
+        if (users == false) return baseRouter.success(res, 200, { users: [] }, errorMessage.DEFAULT)
+        return baseRouter.success(res, 200, { users: users }, "Users filtered successfully!")
+    })
+})
+
+
 
 /**
  * Search public workspaces using their names

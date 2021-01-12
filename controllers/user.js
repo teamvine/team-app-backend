@@ -14,7 +14,7 @@ userController.findByName = (name) => {
             country: 1
         })
         .sort({
-            last_name: 1
+            full_name: 1
         }).limit(10)
 }
 
@@ -46,7 +46,7 @@ userController.getUserChats = (workspace_id, user_id) => {
                 if (doc.chats[index].active == true) {
                     await User.findById(doc.chats[index].user_id)
                         .then(user => {
-                            members.push(_.pick(user, ["_id", "first_name", "last_name", "profile_pic", "display_name", "phone", "email"]))
+                            members.push(_.pick(user, ["_id", "full_name", "profile_pic", "display_name", "phone", "email"]))
                         })
                 }
             }

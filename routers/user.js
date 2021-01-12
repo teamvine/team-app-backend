@@ -113,6 +113,7 @@ router.get("/verify-token", async(req, res) => {
  * Verify email by code
  */
 router.post("/verify_email",(req,res)=>{
+    console.log("#verify email request received...");
     const {EMAIL_VERIFICATION_TEMPLATE} = require("../utils/constants")
     let code = ID(8).generate();
     async function main() {
@@ -123,7 +124,7 @@ router.post("/verify_email",(req,res)=>{
           pass: "chatever50", 
         },
         // debug: true,
-        // logger: true
+        logger: true
       });
       let info = await transporter.sendMail({
         from: '"RCONNECT 👻" <rconnect250@gmail.com>',
@@ -193,20 +194,22 @@ router.get("/check-user-for-chat", (req, res) => {
  * Switch to a workspace: add it to token and get its user's data
  */
 router.post("/switch-workspace", async(req, res) => {
-    console.log("#switch workspace request received...")
+    console.log("#switch to workspace request received...")
     const workspace = req.body.workspace
     let AllInfo = {
         token: "",
         workspace: workspace,
-        channels: [],
-        contacts: []
+        userChannels: [],
+        userContacts: []
     }
     if (!workspace || !workspace._id || workspace._id == "") {
         if (req.body.NEW == true) return baseRouter.error(res, 200, "No new workspace provided!");
     }
     AllInfo.token = auth.switchWorkspace(req.body.token, req.body.workspace)
-    AllInfo.channels = await getAllUsersJoinedChannels(workspace._id,req.body.user_id) || []
-    AllInfo.contacts = await userController.getUserChats(workspace._id,req.body.user_id) || []
+    let ch = await getAllUsersJoinedChannels(workspace._id,req.body.user_id)
+    let cnt = await userController.getUserChats(workspace._id,req.body.user_id)
+    AllInfo.userChannels = ch
+    AllInfo.userContacts = cnt
     return baseRouter.success(res, 200, AllInfo, "Workspace switched successfully!")
 })
 

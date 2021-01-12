@@ -2,6 +2,7 @@ const messageController = {};
 const _ = require('lodash')
 const { ChannelsMessagesJoiValidate, ChannelsMessagesModel } = require('../models/ChannelsMessages.mongodbSchema')
 const messageRepliesController = require('../controllers/messageReplies')
+const userController = require("./user")
 
 /**
  * saves a new channel message
@@ -59,6 +60,8 @@ messageController.getChannelAllMessages = async(workspace_id, channel_id) => {
                         
                         message.replies = replies
                     })
+                    let sender_info = await userController.getUserById(message.sender_id)
+                    message.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
                 allSms.push(message)
             }
             // console.log(allSms);
@@ -89,6 +92,8 @@ messageController.getFewOlderMessages = async(workspace_id, channel_id, last_mes
                     .then(replies => {
                         message.replies = replies
                     })
+                let sender_info = await userController.getUserById(message.sender_id)
+                message.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
                 allSms.push(message)
             }
             return allSms.reverse();

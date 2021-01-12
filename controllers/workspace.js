@@ -4,6 +4,7 @@ const workspaceMemberModel = require("../models/WorkspacesMembers.mongodbSchema"
 const { User } = require("../models/Users.mongodbShema")
 const userController = require("./user");
 const channelController = require('./channel');
+const ChannelMembersModel = require("../models/ChannelsMembers.mongodbSchema")
 const _ = require('lodash')
 
 
@@ -44,8 +45,6 @@ workspaceController.findWorkspace = async(properties = {}) => {
  */
 workspaceController.AddNewMembersOrUpdate = async(workspace_id, newMembers = [{ user_id: "", active: true, joined_on: Date() }]) => {
     try {
-        // newMembers = [{ user_id: "", active: true }]
-        console.log(newMembers)
         let members = await workspaceMemberModel.findOne({ workspace_id: workspace_id })
         if (members == null) {
             members = new workspaceMemberModel({
@@ -92,7 +91,33 @@ workspaceController.getAllMembers = (workspace_id) => {
                 if (doc.members[index].active == true) {
                     await User.findById(doc.members[index].user_id)
                         .then(user => {
-                            members.push(_.pick(user, ["_id", "first_name", "last_name", "profile_pic", "display_name", "phone", "country", "email"]))
+                            members.push(_.pick(user, ["_id", "full_name", "profile_pic", "display_name", "phone", "country", "email"]))
+                        })
+                }
+            }
+            return members
+        }).catch(err => {
+            return false
+        })
+}
+
+/**
+ * This function is the same to getAllMembers except, 
+ * it will return all members of a workspace with few info
+ * @param {String} workspace_id workspace id
+ * @returns workspace all members or false in case of error
+ */
+workspaceController.getAllMembersLightInfo= (workspace_id)=>{
+    let members = []
+    return workspaceMemberModel.findOne({ workspace_id: workspace_id })
+        .then(async(doc) => {
+            if (doc == null) return [];
+            // return active members only
+            for (let index = 0; index < doc.members.length; index++) {
+                if (doc.members[index].active == true) {
+                    await User.findById(doc.members[index].user_id)
+                        .then(user => {
+                            members.push(_.pick(user, ["_id", "full_name", "profile_pic", "display_name", "email"]))
                         })
                 }
             }
@@ -160,13 +185,13 @@ workspaceController.getWorkspaceAllChannels = async(workspace_id) => {
 
 
 /**
- * Search workspaces members using their names
+ * Search workspaces members using their names and roles
  * @param {String} workspace_id workspace id
  * @param {String} user_id user id
- * @param {String} search_srting a search text(full_name or display name)
+ * @param {String} search_srting a search text(full_name or display name or role)
  * @returns workspace members documents in an array or false in case of error
  */
-workspaceController.searchMembersByName = async(workspace_id, user_id, search_srting) => {
+workspaceController.searchMembersByNameOrRole = async(workspace_id, user_id, search_srting) => {
     return await workspaceController.getAllMembers(workspace_id)
         .then(members => {
             if (members === false) return false
@@ -174,8 +199,8 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
             let found = []
             members.forEach(member => {
                 if (
-                    member.full_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0 ||
-                    member.display_name.toString().toLowerCase().indexOf(search_srting.toLowerCase()) >= 0
+                    member.full_name.toString().toLowerCase().includes(search_srting.toLowerCase()) ||
+                    member.display_name.toString().toLowerCase().includes(search_srting.toLowerCase())
                 ) {
                     if (member._id.toString() != user_id.toString()) {
                         filtered.push(member)
@@ -183,7 +208,7 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
                 }
             })
             let i = 0;
-            while (filtered[i] && i < 10) {
+            while (filtered[i] && i < 20) {
                 found.push(filtered[i])
                 i++;
             }
@@ -191,6 +216,47 @@ workspaceController.searchMembersByName = async(workspace_id, user_id, search_sr
         })
 }
 
+/**
+ * Search members that are not in a hiven channel by names, display names or email
+ * @param {String} workspace_id the workspace id
+ * @param {String} channel_id the channel id
+ * @param {String} user_id user id
+ * @param {String} search_srting search query
+ */
+workspaceController.searchMembersNotInChannel = async(workspace_id, channel_id, user_id, search_srting)=>{
+    return await workspaceController.getAllMembersLightInfo(workspace_id)
+        .then( async(members) => {
+            if (members === false) return false
+            let all_w_members = members
+            let channel_members = await ChannelMembersModel.findOne({ workspace_id: workspace_id, channel_id: channel_id })
+            all_w_members.forEach(member => {
+                for(let index=0; index<channel_members.members.length; index++) {
+                    if(channel_members.members[index].user_id==member._id){
+                        all_w_members.splice(all_w_members.indexOf(member),1)
+                    }
+                }
+            })
+            let filtered = []
+            let found = []
+            all_w_members.forEach(member => {
+                if (
+                    member.full_name.toString().toLowerCase().includes(search_srting.toLowerCase()) ||
+                    member.display_name.toString().toLowerCase().includes(search_srting.toLowerCase()) ||
+                    member.email.toString().toLowerCase().includes(search_srting.toLowerCase())
+                ) {
+                    if (member._id.toString() != user_id.toString()) {
+                        filtered.push(member)
+                    }
+                }
+            })
+            let i = 0;
+            while (filtered[i] && i < 20) {
+                found.push(filtered[i])
+                i++;
+            }
+            return found;
+        })
+}
 
 
 /**

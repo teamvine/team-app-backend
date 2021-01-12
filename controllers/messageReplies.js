@@ -1,6 +1,7 @@
 const messageRepliesController = {}
 const _ = require('lodash')
 const { ChannelsMessagesThreadsModel, channelThreadJoiValidate } = require('../models/ChannelsMessagesThreads.mongodbSchema')
+const userController = require("./user")
 
 /**
  * save new reply
@@ -31,10 +32,13 @@ messageRepliesController.getChannelMessageReplies = async(message_id, sender_id,
             message_id: message_id,
             sender_id: sender_id,
             channel_id: channel_id
-        }).then(replies => {
+        }).then(async (replies) => {
             let all = []
             for (let index = 0; index < replies.length; index++) {
-                all.push(_.pick(replies[index], ["_id", "sender_id", "content", "attachments", "sent_at"]))
+                let reply = _.pick(replies[index], ["_id", "sender_id", "content", "attachments", "sent_at"])
+                let sender_info = await userController.getUserById(reply.sender_id)
+                reply.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
+                all.push(reply)
             }
             return all;
         })

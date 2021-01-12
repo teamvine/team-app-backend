@@ -39,6 +39,11 @@ const ChannelsSchema = new mongoose.Schema({
     channel_code: {
         type: String,
         required: true
+    },
+    gen: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 },
 {

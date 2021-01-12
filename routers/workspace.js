@@ -43,7 +43,8 @@ router.post("/new-workspace", async(req, res) => {
                     type: "public",
                     created: Date(),
                     workspace_code: newWorkspace.info.code,
-                    channel_code: IDgen(15).generate()
+                    channel_code: IDgen(15).generate(),
+                    gen: true
                 }).then(result => {
                     if (result != false) newWorkspace.channels = [result]
                         // if created general add members to general
@@ -62,7 +63,7 @@ router.post("/new-workspace", async(req, res) => {
                         workspaceController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), newMembers)
                             .then(members => {
                                 if (!members) return baseRouter.success(res, 200, { info: newWorkspace.info }, "Workspace created but Failed to add members! Add them manually.")
-                                channelController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), result._id.toString(), newWorkspace.members)
+                                channelController.AddNewMembersOrUpdate(newWorkspace.info._id.toString(), result._id.toString(), newWorkspace.members,false)
                                     .then(generalMembers => {
                                         if (!generalMembers) return baseRouter.success(res, 200, { info: newWorkspace.info }, "Workspace created but Failed to add members to general channel! Add them manually.")
                                         return baseRouter.success(res, 200, newWorkspace, "Workspace created Successfully!")
@@ -144,23 +145,48 @@ router.post("/add-members/:workspace_id", async(req, res) => {
             joined_on: new Date()
         })
     });
-    workspaceController.AddNewMembersOrUpdate(workspace_id, newMembers)
-    .then(docs => {
-        if (docs === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-        return baseRouter.success(res, 200, { added_members: docs }, "Members added!")
-    })
+    let wrkspc_members = await workspaceController.AddNewMembersOrUpdate(workspace_id, newMembers)
+    let gen_channel = await channelController.findChannel({workspace_id: workspace_id,gen: true})
+    if(wrkspc_members==false){
+        return baseRouter.error(res, 200, errorMessage.DEFAULT)
+    }else{
+        let genMembers = []
+        newMembers.forEach(member => {
+            genMembers.push({
+                _id: member.user_id,
+                active: true,
+                joined_on: new Date()
+            })
+        });
+        let gen_members = await channelController.AddNewMembersOrUpdate(workspace_id,gen_channel._id,genMembers,false)
+        return baseRouter.success(res, 200, { added_members: wrkspc_members, channel_members: gen_members}, "Members added!")
+    }
 })
 
 
 /**
- * search members by name from a workspace
+ * search members by name or role from a workspace
  */
 router.get("/search-members-by-name", (req, res) => {
-    workspaceController.searchMembersByName(req.query.workspace_id, req.query.user_id, req.query.search_string)
+    workspaceController.searchMembersByNameOrRole(req.query.workspace_id, req.query.user_id, req.query.search_string)
         .then(users => {
             if (users == false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
             return baseRouter.success(res, 200, { filtered_members: users }, "Users filtered successfully!")
         })
+})
+
+
+// search workspace members that are not in a given channel
+router.get("/search-members-notInChannel", (req,res)=>{
+    let workspace_id = req.query.workspace_id
+    let channel_id = req.query.channel_id
+    let user_id = req.query.user_id
+    let search_string = req.query.search_string
+    workspaceController.searchMembersNotInChannel(workspace_id,channel_id,user_id,search_string)
+    .then(users=>{
+        if (users == false) return baseRouter.success(res, 200, { users: [] }, errorMessage.DEFAULT)
+        return baseRouter.success(res, 200, { users: users }, "Users filtered successfully!")
+    })
 })
 
 

@@ -228,17 +228,17 @@ workspaceController.searchMembersNotInChannel = async(workspace_id, channel_id, 
         .then( async(members) => {
             if (members === false) return false
             let all_w_members = members
+            let filtered1 = all_w_members
             let channel_members = await ChannelMembersModel.findOne({ workspace_id: workspace_id, channel_id: channel_id })
             all_w_members.forEach(member => {
-                for(let index=0; index<channel_members.members.length; index++) {
-                    if(channel_members.members[index].user_id==member._id){
-                        all_w_members.splice(all_w_members.indexOf(member),1)
-                    }
+                let added = channel_members.members.find(memb=> memb.user_id==member._id)
+                if(added!=undefined){
+                    filtered1 = filtered1.filter(member=> member._id!=added.user_id)
                 }
             })
             let filtered = []
             let found = []
-            all_w_members.forEach(member => {
+            filtered1.forEach(member => {
                 if (
                     member.full_name.toString().toLowerCase().includes(search_srting.toLowerCase()) ||
                     member.display_name.toString().toLowerCase().includes(search_srting.toLowerCase()) ||

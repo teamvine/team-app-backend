@@ -45,3 +45,8 @@ const CLIENT_SERVER_PORT = process.env.PORT || 3000;
 client_server.listen(CLIENT_SERVER_PORT, function() {
     console.log(`#CLIENT_SERVER is listening on port: ${CLIENT_SERVER_PORT}`);
 });
+
+// const bycrypt = require("bcryptjs");
+// const { BCRYPT_SALT_ROUND } = require('./config/constants');
+
+// console.log(bycrypt.hashSync("Rconnect@rca",BCRYPT_SALT_ROUND))

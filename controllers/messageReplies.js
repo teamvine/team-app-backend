@@ -22,6 +22,22 @@ messageRepliesController.addNewReply = async(reply) => {
 }
 
 /**
+ * deletes a channel message replies
+ * @param {String} message_id message id
+ * @param {String} channel_id channel id
+ */
+messageRepliesController.deleteReply= async(message_id,channel_id)=>{
+    return ChannelsMessagesThreadsModel.findOneAndDelete({
+        message_id: message_id,
+        channel_id: channel_id
+    }).then(deletedMessage=>{
+        return true
+    }).catch(err => {
+        return false
+    })
+}
+
+/**
  * get channel message's replies
  * @param {String} message_id message id
  * @param {String} sender_id sender id

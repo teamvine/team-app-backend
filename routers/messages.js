@@ -5,6 +5,7 @@ const { errorMessage } = require("../config/constants");
 const DirectMessagesController = require('../controllers/personalMessage')
 const ChannelMessagesController = require('../controllers/message');
 const personalMessageController = require("../controllers/personalMessage");
+const messageController = require("../controllers/message");
 
 
 router.use(auth.jwtAuth)
@@ -64,6 +65,26 @@ router.get("/get-channel-older-messages", (req, res) => {
             console.log(err)
             return baseRouter.error(res, 200, errorMessage.DEFAULT)
         })
+})
+
+//delete a channel message
+router.delete('/delete-channel-message', (req,res)=>{
+    console.log("#delete channel message request received...");
+    let w_id = req.body.workspace_id
+    let c_id = req.body.channel_id
+    let m_id = req.body.message_id
+    messageController.deleteMessage(w_id,c_id,m_id)
+    .then(success => {
+        if(!success){
+            return baseRouter.error(res, 200, "Request failed")
+        }
+        else {
+           return baseRouter.success(res, 200, { success: true, message: "Message deleted" }, "Request successfull");
+        }
+    })
+    .catch(err=>{
+        return baseRouter.error(res, 200, errorMessage.DEFAULT)
+    })
 })
 
 // get few older messages in a direct chat

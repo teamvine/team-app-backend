@@ -36,7 +36,7 @@ messageController.deleteMessage= (workspace_id,channel_id,message_id)=>{
         channel_id: channel_id,
         workspace_id: workspace_id
     }).then(deletedMessage=>{
-       return messageRepliesController.deleteReply(message_id, channel_id)
+       return messageRepliesController.deleteReplies(message_id, channel_id)
        .then(deletedReply=> {return true})
        .catch(err => {return false})
     }).catch(err => {

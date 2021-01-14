@@ -87,6 +87,27 @@ router.delete('/delete-channel-message', (req,res)=>{
     })
 })
 
+//delete a direct message
+router.delete('/delete-direct-message', (req,res)=>{
+    console.log("#delete direct message request received...");
+    let w_id = req.body.workspace_id
+    let s_id = req.body.sender_id
+    let r_id = req.body.receiver_id
+    let m_id = req.body.message_id
+    personalMessageController.deleteMessage(w_id,s_id,r_id,m_id)
+    .then(success => {
+        if(!success){
+            return baseRouter.error(res, 200, "Request failed")
+        }
+        else {
+           return baseRouter.success(res, 200, { success: true, message: "Message deleted" }, "Request successfull");
+        }
+    })
+    .catch(err=>{
+        return baseRouter.error(res, 200, errorMessage.DEFAULT)
+    })
+})
+
 // get few older messages in a direct chat
 router.get("/get-direct-chat-older-messages", (req, res) => {
     let config = new Object(req.query);

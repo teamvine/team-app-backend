@@ -21,6 +21,24 @@ personalMessageRepliesController.addNewReply = async(reply) => {
     })
 }
 
+
+/**
+ * deletes a direct chat message replies
+ * @param {String} message_id message id
+ * @param {String} channel_id channel id
+ */
+personalMessageRepliesController.deleteReplies= async(direct_message_id,workspace_id)=>{
+    return DirectMessagesThreadsModel.deleteMany({
+        direct_message_id: direct_message_id,
+        workspace_id: workspace_id
+    }).then(deletedReplies=>{
+        return true
+    }).catch(err => {
+        return false
+    })
+}
+
+
 /**
  * get personal message's all replies
  * @param {String} direct_message_id direct message_id

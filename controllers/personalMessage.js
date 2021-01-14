@@ -24,6 +24,28 @@ personalMessageController.addMessage = async(message) => {
 };
 
 /**
+ * delete a direct message
+ * @param {String} workspace_id workspace id
+ * @param {String} channel_id channel id
+ * @param {String} message_id message id
+ * @returns Boolean
+ */
+personalMessageController.deleteMessage= (workspace_id,sender_id,receiver_id,message_id)=>{
+    return DirectMessagesModel.findOneAndDelete({
+        _id: message_id,
+        sender_id: sender_id,
+        receiver_id: receiver_id,
+        workspace_id: workspace_id
+    }).then(deletedMessage=>{
+       return personalMessageRepliesController.deleteReplies(message_id, workspace_id)
+       .then(deletedReply=> {return true})
+       .catch(err => {return false})
+    }).catch(err => {
+        return false
+    })
+}
+
+/**
  * count direct chat messages
  * @param {String} workspace_id workspace id
  * @param {String} user_id requesting user's id

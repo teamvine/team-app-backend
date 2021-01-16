@@ -46,7 +46,6 @@ messageRepliesController.deleteReplies= async(message_id,channel_id)=>{
 messageRepliesController.getChannelMessageReplies = async(message_id, sender_id, channel_id) => {
     return await ChannelsMessagesThreadsModel.find({
             message_id: message_id,
-            sender_id: sender_id,
             channel_id: channel_id
         }).then(async (replies) => {
             let all = []

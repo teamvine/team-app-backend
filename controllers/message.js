@@ -22,6 +22,28 @@ messageController.addMessage = async(message) => {
     })
 };
 
+
+/**
+ * delete a channel message
+ * @param {String} workspace_id workspace id
+ * @param {String} channel_id channel id
+ * @param {String} message_id message id
+ * @returns Boolean
+ */
+messageController.deleteMessage= (workspace_id,channel_id,message_id)=>{
+    return ChannelsMessagesModel.findOneAndDelete({
+        _id: message_id,
+        channel_id: channel_id,
+        workspace_id: workspace_id
+    }).then(deletedMessage=>{
+       return messageRepliesController.deleteReplies(message_id, channel_id)
+       .then(deletedReply=> {return true})
+       .catch(err => {return false})
+    }).catch(err => {
+        return false
+    })
+}
+
 /**
  * count channel chat messages
  * @param {String} workspace_id workspace id

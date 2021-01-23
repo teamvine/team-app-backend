@@ -22,6 +22,22 @@ messageRepliesController.addNewReply = async(reply) => {
 }
 
 /**
+ * deletes a channel message replies
+ * @param {String} message_id message id
+ * @param {String} channel_id channel id
+ */
+messageRepliesController.deleteReplies= async(message_id,channel_id)=>{
+    return ChannelsMessagesThreadsModel.deleteMany({
+        message_id: message_id,
+        channel_id: channel_id
+    }).then(deletedReplies=>{
+        return true
+    }).catch(err => {
+        return false
+    })
+}
+
+/**
  * get channel message's replies
  * @param {String} message_id message id
  * @param {String} sender_id sender id
@@ -30,14 +46,13 @@ messageRepliesController.addNewReply = async(reply) => {
 messageRepliesController.getChannelMessageReplies = async(message_id, sender_id, channel_id) => {
     return await ChannelsMessagesThreadsModel.find({
             message_id: message_id,
-            sender_id: sender_id,
             channel_id: channel_id
         }).then(async (replies) => {
             let all = []
             for (let index = 0; index < replies.length; index++) {
                 let reply = _.pick(replies[index], ["_id", "sender_id", "content", "attachments", "sent_at"])
                 let sender_info = await userController.getUserById(reply.sender_id)
-                reply.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
+                reply.sender_info = _.pick(sender_info,["_id","full_name","display_name","email","profile_pic"])
                 all.push(reply)
             }
             return all;

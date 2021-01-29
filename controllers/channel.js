@@ -98,7 +98,7 @@ channelController.getAllMembers = (workspace_id, channel_id) => {
                 if (doc.members[index].active == true) {
                     await User.findById(doc.members[index].user_id)
                         .then(user => {
-                            members.push(_.pick(user, ["_id", "first_name", "last_name", "profile_pic", "display_name", "email"]))
+                            members.push(_.pick(user, ["_id", "full_name", "profile_pic", "display_name", "email"]))
                         })
                 }
             }

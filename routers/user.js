@@ -10,6 +10,7 @@ const auth = require("../passport-config");
 const { errorMessage, BCRYPT_SALT_ROUND } = require("../config/constants");
 const bcrypt = require('bcryptjs');
 const userController = require("../controllers/user");
+const Joi = require("joi");
 
 
 /**
@@ -319,17 +320,25 @@ router.put("/update-password", (req, res) => {
 })
 
 router.put("/update-profile", (req,res)=> {
-    if(!req.body.user_id || !req.body.fields || typeof(req.body.fields)=='object') return baseRouter.error(res, 200, "Invalid information")
-    if (UserUpdateJoiValidate(req.body.fields).error) { 
-        const err = UserUpdateJoiValidate(req.body.fields).error.details[0].message
+    if(!req.body.user_id || !req.body.fields || typeof(req.body.fields)!='object') return baseRouter.error(res, 200, "Invalid information")
+    let fields = req.body.fields;
+    if(typeof(fields.born)=="string"){
+        if(fields.born.trim()==""){
+            fields.born = null;
+        }else {
+            if(new Date(fields.born)=="Invalid Date") fields.born = null;
+            else fields.born = new Date(fields.born);
+        }
+    } 
+    if (UserUpdateJoiValidate(fields).error) { 
+        const err = UserUpdateJoiValidate(fields).error.details[0].message
         return baseRouter.error(res, 200, err.toString().replace(/"/gi, ""));
     }
-    return baseRouter.success(res, 200, { success: true, fields:  req.body.fields}, "Request successful")
-    // userController.updateUserAccount(req.body.user_id, req.body.fields)
-    //     .then(doc => {
-    //         if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-    //         return baseRouter.success(res, 200, { success: true, user: doc }, "Request successful")
-    //     })
+    userController.updateUserAccount(req.body.user_id, fields)
+        .then(doc => {
+            if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
+            return baseRouter.success(res, 200, { success: true, user: doc }, "Request successful")
+        })
 })
 
 

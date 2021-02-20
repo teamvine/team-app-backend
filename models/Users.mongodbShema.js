@@ -77,10 +77,10 @@ module.exports.UserUpdateJoiValidate = function(obj) {
     var schema = Joi.object({
         full_name: Joi.string().min(4).required(),
         display_name: Joi.string().min(4).max(30).required(),
-        role: Joi.string().allow("").required(),
-        phone: Joi.string().allow("").required(),
-        country: Joi.string().allow("").required(),
-        born: Joi.date().allow(null).required()
+        role: Joi.string().allow(""),
+        phone: Joi.string().allow(""),
+        country: Joi.string().allow(""),
+        born: Joi.date().allow(null)
     })
     return schema.validate(obj);
 }

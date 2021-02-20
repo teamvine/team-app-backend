@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const nodemailer = require("nodemailer");
 const baseRouter = require("./baseRouter");
-const { User, UserJoiValidate } = require('../models/Users.mongodbShema')
+const { User, UserUpdateJoiValidate, UserJoiValidate } = require('../models/Users.mongodbShema')
 const UserController = require("../controllers/user");
 const workspaceController = require("../controllers/workspace")
 const {getAllUsersJoinedChannels} = require("../controllers/channel")
@@ -298,32 +298,38 @@ router.post("/account-info", async(req, res) => {
 /**
  * Update user account info
  */
-router.put("/update-account", (req, res) => {
+router.put("/update-password", (req, res) => {
     console.log("#update account requesr received...");
     let fields = {}
-    if (req.body.fields.password) {
-        userController.getUserById(req.body.user_id)
-            .then(doc => {
-                if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-                if (!bcrypt.compareSync(req.body.fields.old_password, doc.password)) {
+    userController.getUserById(req.body.user_id)
+        .then(doc => {
+            if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
+            if (!bcrypt.compareSync(req.body.fields.old_password, doc.password)) {
                     return baseRouter.success(res, 200, { success: false }, "* The current password is incorrect *")
-                }
-                fields = {
-                    password: bcrypt.hashSync(req.body.fields.password, BCRYPT_SALT_ROUND)
-                }
-                userController.updateUserAccount(req.body.user_id, fields)
-                    .then(doc => {
-                        if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-                        return baseRouter.success(res, 200, { success: true }, "Request successful")
-                    })
-            })
-    } else {
-        userController.updateUserAccount(req.body.user_id, req.body.fields)
-            .then(doc => {
-                if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-                return baseRouter.success(res, 200, { success: true, user: doc }, "Request successful")
-            })
+            }
+            fields = {
+                password: bcrypt.hashSync(req.body.fields.password, BCRYPT_SALT_ROUND)
+            }
+            userController.updateUserAccount(req.body.user_id, fields)
+                .then(doc => {
+                    if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
+                    return baseRouter.success(res, 200, { success: true }, "Request successful")
+                })
+        })
+})
+
+router.put("/update-profile", (req,res)=> {
+    if(!req.body.user_id || !req.body.fields || typeof(req.body.fields)=='object') return baseRouter.error(res, 200, "Invalid information")
+    if (UserUpdateJoiValidate(req.body.fields).error) { 
+        const err = UserUpdateJoiValidate(req.body.fields).error.details[0].message
+        return baseRouter.error(res, 200, err.toString().replace(/"/gi, ""));
     }
+    return baseRouter.success(res, 200, { success: true, fields:  req.body.fields}, "Request successful")
+    // userController.updateUserAccount(req.body.user_id, req.body.fields)
+    //     .then(doc => {
+    //         if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
+    //         return baseRouter.success(res, 200, { success: true, user: doc }, "Request successful")
+    //     })
 })
 
 

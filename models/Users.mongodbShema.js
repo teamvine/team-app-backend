@@ -72,4 +72,17 @@ module.exports.UserJoiValidate = function(obj) {
     })
     return schema.validate(obj);
 }
+
+module.exports.UserUpdateJoiValidate = function(obj) {
+    var schema = Joi.object({
+        full_name: Joi.string().min(4).required(),
+        display_name: Joi.string().min(4).max(30).required(),
+        role: Joi.string().allow("").required(),
+        phone: Joi.string().allow("").required(),
+        country: Joi.string().allow("").required(),
+        born: Joi.date().allow(null).required()
+    })
+    return schema.validate(obj);
+}
+
 module.exports.User = mongoose.model('Users', UsersSchema);

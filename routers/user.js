@@ -10,7 +10,6 @@ const auth = require("../passport-config");
 const { errorMessage, BCRYPT_SALT_ROUND } = require("../config/constants");
 const bcrypt = require('bcryptjs');
 const userController = require("../controllers/user");
-const Joi = require("joi");
 
 
 /**

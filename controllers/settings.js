@@ -1,6 +1,4 @@
 const accountSettingsController = {};
-const { String } = require('core-js');
-const { errorMessage } = require('../config/constants');
 const { AccountSettings, accountSettingsValidate, notificationSettingsValidate } = require('../models/AccountSettings.mongodbSchema')
 
 /**
@@ -35,6 +33,7 @@ accountSettingsController.newSettings = async(settings)=>{
         }))
     }
 }
+
 
 
 /**

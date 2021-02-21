@@ -3,6 +3,8 @@ const accountSettingsController = require('../controllers/settings')
 const baseRouter = require("./baseRouter")
 const {User} = require('../models/Users.mongodbShema')
 const {errorMessage} = require('../config/constants')
+const auth = require("../passport-config");
+
 
 /**
  * Initialise user account settings using id
@@ -49,6 +51,12 @@ router.post("/new-settings", async(req,res)=> {
     })
 })
 
+
+router.use(auth.jwtAuth)
+
+/**
+ * Update notifications settings
+ */
 router.put("/update-nofication-settings", async(req,res)=> {
     if(!req.body.user_id || typeof(req.body.user_id)!="string"){
         return baseRouter.error(res, 200, "Invalid user id!")

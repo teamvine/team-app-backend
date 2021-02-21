@@ -59,7 +59,7 @@ router.post("/register", async(req, res) => {
     newuser.password = bcrypt.hashSync(newuser.password, BCRYPT_SALT_ROUND);
     try {
         let user = await UserController.addUser(newuser);
-        delete user.password;
+        user.password = ""
         return baseRouter.success(res, 200, user, "* User registration succeeded! *");
     } catch (err) {
         return baseRouter.error(res, 200, errorMessage.DEFAULT);

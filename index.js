@@ -9,7 +9,7 @@ const ChannelRouter = require("./routers/channel");
 const MessagesRouter = require("./routers/messages")
 const WorkspaceRouter = require("./routers/workspace");
 const bodyParser = require('body-parser');
-const settingsRouter = require('./routers/settingsRouter')
+const settingsRouter = require('./routers/settings')
 const upload = require("multer")({
     dest: "./public/images"
 });

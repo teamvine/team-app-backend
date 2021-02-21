@@ -3,6 +3,7 @@ const { User } = require("../models/Users.mongodbShema");
 const UserChats = require("../models/UsersChats.mongodbSchema")
 const { errorMessage } = require("../config/constants");
 const _ = require('lodash')
+const accountSettingsController = require('./settings')
 
 
 userController.findByName = (name) => {
@@ -33,7 +34,34 @@ userController.getUserById = async(id) => {
 userController.addUser = (user) => {
     const newUser = new User(user)
     newUser.save()
-    return newUser;
+
+    let settings = {
+        user_id: newUser._id+"",
+        notification: {
+            email_notifications: false,
+            mobile_notifications: false,
+            desktop_notifications: false,
+            turn_all_off: false,
+            hide_message_content: false,
+            play_sound: false
+        },
+        theme: {
+            color_theme: 'light',
+            accent_color: 'blue'
+        },
+        message: {
+            play_sound: true
+        }
+    }
+    return accountSettingsController.newSettings(settings).then(set=> {
+        if(!set.success){
+            console.log(new Date(), " ERROR", "Failed to create user settings")
+        }
+        return newUser;
+    }).catch(err=> {
+        console.log(new Date(), " ERROR", "Failed to create user settings")
+        return newUser;
+    })
 };
 
 userController.getUserChats = (workspace_id, user_id) => {

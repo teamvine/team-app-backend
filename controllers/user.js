@@ -43,7 +43,7 @@ userController.addUser = (user) => {
             desktop_notifications: false,
             turn_all_off: false,
             hide_message_content: false,
-            play_sound: false
+            play_sound: true,
         },
         theme: {
             color_theme: 'light',

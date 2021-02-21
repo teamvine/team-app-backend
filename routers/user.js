@@ -337,7 +337,13 @@ router.put("/update-profile", (req,res)=> {
     userController.updateUserAccount(req.body.user_id, fields)
         .then(doc => {
             if (doc === false) return baseRouter.error(res, 200, errorMessage.DEFAULT)
-            return baseRouter.success(res, 200, { success: true, user: doc }, "Request successful")
+            return baseRouter.success(
+                res, 200, 
+                { 
+                    success: true 
+                },
+                "Request successful"
+            )
         })
 })
 

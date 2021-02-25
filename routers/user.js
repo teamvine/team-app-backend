@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const nodemailer = require("nodemailer");
 const baseRouter = require("./baseRouter");
-const { User, UserUpdateJoiValidate, UserJoiValidate } = require('../models/Users.mongodbShema')
+const { UserUpdateJoiValidate, UserJoiValidate } = require('../models/Users.mongodbShema')
 const UserController = require("../controllers/user");
 const workspaceController = require("../controllers/workspace")
 const {getAllUsersJoinedChannels} = require("../controllers/channel")
@@ -10,6 +10,8 @@ const auth = require("../passport-config");
 const { errorMessage, BCRYPT_SALT_ROUND } = require("../config/constants");
 const bcrypt = require('bcryptjs');
 const userController = require("../controllers/user");
+const userProfilePictureController = require('../controllers/userProfilePicture');
+const { log } = require("debug");
 
 
 /**
@@ -25,7 +27,7 @@ router.post("/login", (req, res) => {
                     return baseRouter.error(res, 200, errorMessage.WRONG_EMAIL_OR_PASSWORD);
                 let token = auth.createToken(user);
                 user.password = "";
-                return baseRouter.success(res, 200, { token, user });
+                return baseRouter.success(res, 200, { token });
             })
             .catch((err) => {
                 return baseRouter.error(res, 200, err.message);
@@ -59,6 +61,9 @@ router.post("/register", async(req, res) => {
     try {
         let user = await UserController.addUser(newuser);
         user.password = ""
+        user.profile_picture={
+            updated: false
+        }
         return baseRouter.success(res, 200, user, "* User registration succeeded! *");
     } catch (err) {
         return baseRouter.error(res, 200, errorMessage.DEFAULT);
@@ -93,6 +98,21 @@ router.get("/verify-token", async(req, res) => {
         }
         //fetch user
         AllInfo.user = await UserController.getUserById(decoded.user_id) || {};
+        let pic = await userProfilePictureController.getDocFieldsByUserId(decoded.user_id, {user_id: 1, picture: {caption: 1, created_at: 1, updated_at: 1, url: 1}})
+        AllInfo.user = AllInfo.user.toObject();
+        if(pic){
+            AllInfo.user.profile_pic = {
+                updated: true,
+                caption: pic.picture.caption,
+                created_at: pic.picture.created_at,
+                updated_at: pic.picture.updated_at,
+                url: pic.picture.url
+            }
+        }else{
+            AllInfo.user.profile_pic = {
+                updated: false
+            }
+        }
         AllInfo.user.password = ""
         //fetch workspaces
         AllInfo.userWorkspaces = await workspaceController.getUserWorkspaces(decoded.user_id) || []

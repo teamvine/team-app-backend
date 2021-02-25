@@ -19,6 +19,11 @@ const UsersSchema = new mongoose.Schema({
         trim: true,
         default: "default_prof_pic.png"
     },
+    picture_updated: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
     email: {
         type: String,
         required: true,

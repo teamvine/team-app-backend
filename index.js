@@ -44,3 +44,6 @@ const CLIENT_SERVER_PORT = process.env.PORT || 3000;
 client_server.listen(CLIENT_SERVER_PORT, function() {
     console.log(`#CLIENT_SERVER is listening on port: ${CLIENT_SERVER_PORT}`);
 });
+
+// const { User } = require('./models/Users.mongodbShema')
+// User.updateMany({profile_pic:"default_prof_pic.png"}, {$set: {picture_updated: false}}).then(docs=> console.log(docs))

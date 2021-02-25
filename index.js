@@ -10,9 +10,6 @@ const MessagesRouter = require("./routers/messages")
 const WorkspaceRouter = require("./routers/workspace");
 const bodyParser = require('body-parser');
 const settingsRouter = require('./routers/settings')
-const upload = require("multer")({
-    dest: "./public/images"
-});
 const cors_opts = {}
 const history = require("connect-history-api-fallback");
 const passport = require("passport");

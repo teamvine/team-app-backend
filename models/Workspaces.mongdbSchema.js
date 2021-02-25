@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 var Joi = require('joi');
-const md5 = require('md5');
 
 const WorkspacesSchema = new mongoose.Schema({
     name: {

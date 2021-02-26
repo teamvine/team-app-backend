@@ -5,10 +5,11 @@ const bcrypt = require('bcryptjs');
 const connection = mongoose.connect('mongodb+srv://egide:8QVEpKfW8r2UVPsw@devdbs.xcnlk.gcp.mongodb.net/teamDb?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => {
+}).then((conn) => {
     console.log("#Connected to mongodb successfully...")
-}).catch(() => {
-    console.log("#Failed to connect to mongodb...")
+    return conn
+}).catch((err) => {
+    console.log("#Failed to connect to mongodb:", err.message)
 })
 
 // development! localhost mongodb

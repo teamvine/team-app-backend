@@ -3,6 +3,7 @@ const _ = require('lodash')
 const { ChannelsMessagesJoiValidate, ChannelsMessagesModel } = require('../models/ChannelsMessages.mongodbSchema')
 const messageRepliesController = require('../controllers/messageReplies')
 const userController = require("./user")
+const userProfPicController = require('./userProfilePicture')
 
 /**
  * saves a new channel message
@@ -77,13 +78,25 @@ messageController.getChannelAllMessages = async(workspace_id, channel_id) => {
             for (let index = 0; index < messages.length; index++) {
                 let message = _.pick(messages[index], ["_id", "sender_id", "channel_id", "workspace_id", "content", "sent_at", "attachments"])
                 await messageRepliesController.getChannelMessageReplies(message._id, message.sender_id, message.channel_id)
-                    .then(replies => {
-                        // console.log(replies);
-                        
-                        message.replies = replies
-                    })
-                    let sender_info = await userController.getUserById(message.sender_id)
-                    message.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
+                .then(replies => {
+                    message.replies = replies
+                })
+                let sender_info = await userController.getUserById(message.sender_id)
+                let sender = sender_info.toObject();
+                if(!sender.picture_updated){
+                    sender.profile_pic = {
+                        updated: false
+                    }
+                }else{
+                    let pic = await userProfPicController.getDocFieldsByUserId(sender._id, {picture: {url: 1}})
+                    if(pic){
+                        sender.profile_pic = {
+                            updated: true,
+                            url: pic.picture.url
+                        }
+                    }
+                }
+                message.sender_info = _.pick(sender,["full_name","display_name","email","profile_pic", "picture_updated"])
                 allSms.push(message)
             }
             // console.log(allSms);
@@ -111,11 +124,25 @@ messageController.getFewOlderMessages = async(workspace_id, channel_id, last_mes
             for (let index = 0; index < messages.length; index++) {
                 let message = _.pick(messages[index], ["_id", "sender_id", "channel_id", "workspace_id", "content", "sent_at", "attachments"])
                 await messageRepliesController.getChannelMessageReplies(message._id, message.sender_id, message.channel_id)
-                    .then(replies => {
-                        message.replies = replies
-                    })
+                .then(replies => {
+                    message.replies = replies
+                })
                 let sender_info = await userController.getUserById(message.sender_id)
-                message.sender_info = _.pick(sender_info,["full_name","display_name","email","profile_pic"])
+                let sender = sender_info.toObject();
+                if(!sender.picture_updated){
+                    sender.profile_pic = {
+                        updated: false
+                    }
+                }else{
+                    let pic = await userProfPicController.getDocFieldsByUserId(sender._id, {picture: {url: 1}})
+                    if(pic){
+                        sender.profile_pic = {
+                            updated: true,
+                            url: pic.picture.url
+                        }
+                    }
+                }
+                message.sender_info = _.pick(sender,["full_name","display_name","email","profile_pic", "picture_updated"])
                 allSms.push(message)
             }
             return allSms.reverse();

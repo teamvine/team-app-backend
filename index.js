@@ -6,14 +6,14 @@ const client_server = express();
 const cors = require("cors");
 const UserRouter = require("./routers/user");
 const ChannelRouter = require("./routers/channel");
-const MessagesRouter = require("./routers/messages")
+const MessagesRouter = require("./routers/messages");
 const WorkspaceRouter = require("./routers/workspace");
 const bodyParser = require('body-parser');
-const settingsRouter = require('./routers/settings')
-const cors_opts = {}
+const settingsRouter = require('./routers/settings');
+const cors_opts = {};
 const history = require("connect-history-api-fallback");
 const passport = require("passport");
-const path = require("path");
+const path = require('path');
 
 
 

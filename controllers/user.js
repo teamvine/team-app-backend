@@ -4,6 +4,7 @@ const UserChats = require("../models/UsersChats.mongodbSchema")
 const { errorMessage } = require("../config/constants");
 const _ = require('lodash')
 const accountSettingsController = require('./settings')
+const userProfPicController = require('./userProfilePicture')
 
 
 userController.findByName = (name) => {
@@ -73,8 +74,22 @@ userController.getUserChats = (workspace_id, user_id) => {
             for (let index = 0; index < doc.chats.length; index++) {
                 if (doc.chats[index].active == true) {
                     await User.findById(doc.chats[index].user_id)
-                        .then(user => {
-                            members.push(_.pick(user, ["_id", "full_name", "profile_pic", "display_name", "phone", "email"]))
+                        .then(async(user) => {
+                            let user_chat = user.toObject();
+                            if(!user_chat.picture_updated){
+                                user_chat.profile_pic = {
+                                    updated: false
+                                }
+                            }else{
+                                let pic = await userProfPicController.getDocFieldsByUserId(user_chat._id, {picture: {url: 1}})
+                                if(pic){
+                                    user_chat.profile_pic = {
+                                        updated: true,
+                                        url: pic.picture.url
+                                    }
+                                }
+                            }
+                            members.push(_.pick(user_chat, ["_id", "full_name", "profile_pic", "display_name", "phone", "email"]))
                         })
                 }
             }

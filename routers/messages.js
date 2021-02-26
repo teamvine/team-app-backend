@@ -8,7 +8,7 @@ const personalMessageController = require("../controllers/personalMessage");
 const messageController = require("../controllers/message");
 
 
-router.use(auth.jwtAuth)
+router.use(auth.jwtAuth);
 
 //get direct chat all messages
 router.get("/get-direct-chat-messages", (req, res) => {
@@ -18,7 +18,7 @@ router.get("/get-direct-chat-messages", (req, res) => {
             if(num<1) return baseRouter.success(res, 200, { messages: [],noMore: true }, "Request successfull.");
             DirectMessagesController.getPersonalChatMessages(req.query.workspace_id, req.query.user_id, req.query.partner_id)
             .then(messages => {
-                if (messages == false) return baseRouter.success(res, 200, { messages: [],noMore: true }, "Request successfull.")
+                if (messages === false) return baseRouter.success(res, 200, { messages: [],noMore: true }, "Request successfull.")
                 return baseRouter.success(res, 200, { messages: messages,noMore: num>20? false:true }, "Request successfull.")
             })
         })
@@ -26,7 +26,7 @@ router.get("/get-direct-chat-messages", (req, res) => {
             console.log(err)
             return baseRouter.error(res, 200, errorMessage.DEFAULT)
         })
-})
+});
 
 //get all channel chat messages
 router.get("/get-all-channel-messages", (req, res) => {
@@ -36,7 +36,7 @@ router.get("/get-all-channel-messages", (req, res) => {
             if(num<1) return baseRouter.success(res, 200, { messages: [],noMore: true }, "Request successfull.");
             ChannelMessagesController.getChannelAllMessages(req.query.workspace_id, req.query.channel_id)
             .then(messages => {
-                if (messages == false) return baseRouter.success(res, 200, { messages: [],noMore: true }, "Request successfull.")
+                if (messages === false) return baseRouter.success(res, 200, { messages: [],noMore: true }, "Request successfull.")
                 return baseRouter.success(res, 200, { messages: messages,noMore: num>20? false:true }, "Request successfull.")
             })
         })
@@ -44,7 +44,7 @@ router.get("/get-all-channel-messages", (req, res) => {
             console.log(err)
             return baseRouter.error(res, 200, errorMessage.DEFAULT)
         })
-})
+});
 
 // get few older messages in a channel
 router.get("/get-channel-older-messages", (req, res) => {
@@ -53,12 +53,12 @@ router.get("/get-channel-older-messages", (req, res) => {
     ChannelMessagesController.countMessages(config.workspace_id, config.channel_id)
         .then(num => {
             if (num === false) return baseRouter.error(res, 200, errorMessage.DEFAULT);
-            if (num == config.config.ALL_SMS_LENGTH) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: [] }, "Request successfull");
+            if (num === config.config.ALL_SMS_LENGTH) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: [] }, "Request successfull");
             ChannelMessagesController.getFewOlderMessages(config.workspace_id, config.channel_id, config.config.LAST_SMS_ID)
                 .then(docs => {
                     if (docs === false) return baseRouter.error(res, 200, errorMessage.DEFAULT);
                     let newCount = Number(config.config.ALL_SMS_LENGTH + docs.length);
-                    if (newCount == Number(num)) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: docs }, "Request successfull");
+                    if (newCount === Number(num)) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: docs }, "Request successfull");
                     return baseRouter.success(res, 200, { success: true, noMoreMessages: false, messages: docs }, "Request successfull");
                 })
         }).catch(err => {
@@ -85,7 +85,7 @@ router.delete('/delete-channel-message', (req,res)=>{
     .catch(err=>{
         return baseRouter.error(res, 200, errorMessage.DEFAULT)
     })
-})
+});
 
 //delete a direct message
 router.delete('/delete-direct-message', (req,res)=>{
@@ -106,7 +106,7 @@ router.delete('/delete-direct-message', (req,res)=>{
     .catch(err=>{
         return baseRouter.error(res, 200, errorMessage.DEFAULT)
     })
-})
+});
 
 // get few older messages in a direct chat
 router.get("/get-direct-chat-older-messages", (req, res) => {
@@ -115,12 +115,12 @@ router.get("/get-direct-chat-older-messages", (req, res) => {
     personalMessageController.countMessages(config.workspace_id, config.user_id, config.partner_id)
         .then(num => {
             if (num === false) return baseRouter.error(res, 200, errorMessage.DEFAULT);
-            if (num == config.config.ALL_SMS_LENGTH) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: [] }, "Request successfull");
+            if (num === config.config.ALL_SMS_LENGTH) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: [] }, "Request successfull");
             personalMessageController.getFewOlderMessages(config.workspace_id, config.user_id, config.partner_id, config.config.LAST_SMS_ID)
                 .then(docs => {
                     if (docs === false) return baseRouter.error(res, 200, errorMessage.DEFAULT);
                     let newCount = Number(config.config.ALL_SMS_LENGTH + docs.length);
-                    if (newCount == Number(num)) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: docs }, "Request successfull");
+                    if (newCount === Number(num)) return baseRouter.success(res, 200, { success: true, noMoreMessages: true, messages: docs }, "Request successfull");
                     return baseRouter.success(res, 200, { success: true, noMoreMessages: false, messages: docs }, "Request successfull");
                 })
         }).catch(err => {

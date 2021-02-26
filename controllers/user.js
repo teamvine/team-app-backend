@@ -136,6 +136,15 @@ userController.updateUserAccount = async(user_id, fields) => {
         })
 }
 
+/**
+ * update the field updated profile picture
+ * @param {String} user_id user id
+ * @param {Boolean} new_val new value
+ */
+userController.setUpdatedProfilePic= (user_id, new_val)=> {
+    return User.findByIdAndUpdate(user_id, {picture_updated: new_val}, {useFindAndModify: false})
+}
+
 
 userController.User = User;
 

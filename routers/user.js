@@ -366,5 +366,15 @@ router.put("/update-profile", (req,res)=> {
         })
 })
 
+router.put("/set-updated-profile-pic", (req,res)=>{
+   userController.setUpdatedProfilePic(req.body.user_id, req.body.new_val)
+   .then(doc=> {
+       if(doc) return baseRouter.success(res, 200, {success: true}, "updated");
+       else return baseRouter.error(res, 200, "failed");
+   }).catch(err=> {
+       return baseRouter.error(res, 200, "failed");
+   })
+})
+
 
 module.exports = router;

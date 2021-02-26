@@ -28,7 +28,7 @@ auth.switchWorkspace = (token, workspace) => {
 }
 
 auth.jwtAuth = (req, res, next) => {
-    const authorization = req.headers.authorization;
+    const authorization = req.headers.authorization+"";
     if (authorization && authorization.split(" ")[0] === "Bearer") {
         let decoded = auth.verifyToken(authorization.split(" ")[1]);
         if (!decoded || !decoded.user_id || decoded.user_id == "") {

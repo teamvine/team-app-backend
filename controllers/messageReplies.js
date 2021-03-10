@@ -2,6 +2,7 @@ const messageRepliesController = {}
 const _ = require('lodash')
 const { ChannelsMessagesThreadsModel, channelThreadJoiValidate } = require('../models/ChannelsMessagesThreads.mongodbSchema')
 const userController = require("./user")
+const userProfPicController = require('./userProfilePicture')
 
 /**
  * save new reply
@@ -51,8 +52,24 @@ messageRepliesController.getChannelMessageReplies = async(message_id, sender_id,
             let all = []
             for (let index = 0; index < replies.length; index++) {
                 let reply = _.pick(replies[index], ["_id", "sender_id", "content", "attachments", "sent_at"])
+                //====================================
                 let sender_info = await userController.getUserById(reply.sender_id)
-                reply.sender_info = _.pick(sender_info,["_id","full_name","display_name","email","profile_pic"])
+                let sender = sender_info.toObject();
+                if(!sender.picture_updated){
+                    sender.profile_pic = {
+                        updated: false
+                    }
+                }else{
+                    let pic = await userProfPicController.getDocFieldsByUserId(sender._id, {picture: {url: 1}})
+                    if(pic){
+                        sender.profile_pic = {
+                            updated: true,
+                            url: pic.picture.url
+                        }
+                    }
+                }
+                reply.sender_info = _.pick(sender,["_id","full_name","display_name","email","profile_pic", "picture_updated"])
+                // ===================================
                 all.push(reply)
             }
             return all;

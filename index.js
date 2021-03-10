@@ -8,6 +8,7 @@ const UserRouter = require("./routers/user");
 const ChannelRouter = require("./routers/channel");
 const MessagesRouter = require("./routers/messages");
 const WorkspaceRouter = require("./routers/workspace");
+const MiscellaneousRouter = require('./routers/misc')
 const bodyParser = require('body-parser');
 const settingsRouter = require('./routers/settings');
 const cors_opts = {};
@@ -32,6 +33,7 @@ client_server.use("/channel", ChannelRouter);
 client_server.use("/workspace", WorkspaceRouter);
 client_server.use("/message", MessagesRouter);
 client_server.use("/settings", settingsRouter)
+client_server.use("/misc", MiscellaneousRouter)
 client_server.get("/",(req,res)=>{
     return res.send({
         status: "Working",

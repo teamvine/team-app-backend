@@ -12,7 +12,7 @@ router.use(auth.jwtAuth)
 
 /**
  * Register an new Workspace
- */ 
+ */  
 router.post("/new-workspace", async(req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = auth.verifyToken(token)
